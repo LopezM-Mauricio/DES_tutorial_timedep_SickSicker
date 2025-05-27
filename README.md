@@ -4,7 +4,20 @@ V.1.04.1.2025
 
 Please cite the preprint article: https://doi.org/10.1101/2025.05.15.25327635
 
-Structure of Repository: 
+@article {Lopez-Mendez2025.05.15.25327635,
+	author = {Lopez-Mendez, Mauricio and Goldhaber-Fiebert, Jeremy D. and Alarid-Escudero, Fernando},
+	title = {A Tutorial on Discrete Event Simulation Models in R Using a Cost-Effectiveness Analysis Example},
+	elocation-id = {2025.05.15.25327635},
+	year = {2025},
+	doi = {10.1101/2025.05.15.25327635},
+	publisher = {Cold Spring Harbor Laboratory Press},
+	abstract = {Discrete Event Simulation (DES) is a flexible and computationally efficient approach for modeling diverse processes; however, DES remains underutilized in healthcare and medical decision-making due to a lack of reliable and reproducible implementations. We developed an open-source DES framework in R to simulate individual-level state-transition models (iSTMs) in continuous time accounting for treatment effects, time dependence on state residence, and age-dependent mortality.Our DES implementation employs a modular and easily adaptable structure, with each module corresponding to a unique transition between health states. To simulate the evolution of the process (i.e., individual state transitions), we adapted the next-reaction algorithm from the stochastic chemical reactions literature. Simulation-time dependence (age-dependent mortality) and state residence time dependence (transition from Sick to Sicker) are seamlessly incorporated into the DES framework via validated non-parametric and parametric sampling routines (e.g., inversion method) of event times. Treatment effects are integrated as scaling factors of the hazard functions (proportional hazards). We illustrate the framework{\textquoteright}s benefits by implementing the Sick-Sicker Model and conduct a cost-effectiveness analysis and probabilistic sensitivity analysis. We also obtain epidemiological outcomes of interest from the DES output, such as disease prevalence, survival probabilities, and distributions of state-specific dwell times. Our DES framework offers a reliable and accessible alternative that enables the simulation of more realistic dynamics of state-transition processes at potentially lower implementation and computational costs than discrete time iSTMs.Competing Interest StatementThe authors have declared no competing interest.Funding StatementDr. Goldhaber-Fiebert and Dr. Lopez-Mendez have no relevant funding to declare. Dr. Alarid-Escudero was supported by grants U01-CA253913, and U01-CA265750 from the National Cancer Institute (NCI) as part of the Cancer Intervention and Surveillance Modeling Network (CISNET).Author DeclarationsI confirm all relevant ethical guidelines have been followed, and any necessary IRB and/or ethics committee approvals have been obtained.YesI confirm that all necessary patient/participant consent has been obtained and the appropriate institutional forms have been archived, and that any patient/participant/sample identifiers included were not known to anyone (e.g., hospital staff, patients or participants themselves) outside the research group so cannot be used to identify individuals.YesI understand that all clinical trials and any other prospective interventional studies must be registered with an ICMJE-approved registry, such as ClinicalTrials.gov. I confirm that any such study reported in the manuscript has been registered and the trial registration ID is provided (note: if posting a prospective study registered retrospectively, please provide a statement in the trial ID field explaining why the study was not registered in advance).YesI have followed all appropriate research reporting guidelines, such as any relevant EQUATOR Network research reporting checklist(s) and other pertinent material, if applicable.YesAll data and code produced are available online at https://github.com/LopezM-Mauricio/DES_Tutorial https://github.com/LopezM-Mauricio/DES_Tutorial},
+	URL = {https://www.medrxiv.org/content/early/2025/05/16/2025.05.15.25327635},
+	eprint = {https://www.medrxiv.org/content/early/2025/05/16/2025.05.15.25327635.full.pdf},
+	journal = {medRxiv}
+}
+
+# Structure of Repository: 
 
 DES_Tutorial_beta/
 
