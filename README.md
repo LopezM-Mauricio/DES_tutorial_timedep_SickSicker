@@ -2,7 +2,7 @@
 Beta Release of DES Tutorial. 
 V.1.04.1.2025
 
-Please cite the preprint article: https://doi.org/10.1101/2025.05.12.25327470
+Please cite the preprint article: https://doi.org/10.1101/2025.05.15.25327635
 
 Structure of Repository: 
 
