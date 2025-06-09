@@ -1,7 +1,17 @@
 #------------------------------------------------------------------------------#
 # INSTALL DEPENDENCIES FOR RUNNING DES OF
 # SICK SICKER MODEL WITH RECURRENCE
-# Author: Mauricio Lopez-Mendez PhD (Stanford Health Policy)
+
+#* Authors: 
+#* - XXXXX
+#* - XXXXX
+#* - XXXXX
+#------------------------------------------------------------------------------#
+#* Please cite the article(s) when using this code
+#* XXXXX open article
+#* doi: XXXXX
+#* bibtex: XXXXX
+#------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 # Description ----
 #* 1. Ensure package renv is installed, and restores project library version from

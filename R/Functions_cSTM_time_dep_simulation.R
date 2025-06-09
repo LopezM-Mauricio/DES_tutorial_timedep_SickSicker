@@ -1,6 +1,24 @@
 #------------------------------------------------------------------------------#
-####                         Decision Model                                 ####
+####                         Decision Model                                ####
+# Functions to run Time-dependent cohort State Transition Model
 #------------------------------------------------------------------------------#
+#* Authors: 
+#* - XXXXX
+#* - XXXXX
+#* - XXXXX
+#------------------------------------------------------------------------------#
+#* Please cite the corresponding tutorials when using these functions: 
+#* XXXXX open article
+#* doi: XXXXX
+#* bibtex: XXXXX
+
+#* -
+#* -
+#* -
+#* -
+#* -
+#----------------------------------------------------------------------------#
+
 #' Decision Model
 #'
 #' \code{decision_model} implements the decision model used.

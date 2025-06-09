@@ -3,15 +3,16 @@
 # Utility Functions compiled from previous tutorials. Represents the work of many 
 # collaborators, including: 
 
-#* - Fernando Alarid-Escudero 
-#* - Eline Krijkamp
-#* - Eva A. Enns
-#* - Alan Yang
-#* - M.G. Myriam Hunink
-#* - Petros Pechlivanoglou
-#* - Hawre Jalal
-
+#* Authors: 
+#* - XXXXX
+#* - XXXXX
+#* - XXXXX
+#------------------------------------------------------------------------------#
 #* Please cite the corresponding tutorials when using these functions: 
+#* XXXXX open article
+#* doi: XXXXX
+#* bibtex: XXXXX
+
 #* -
 #* -
 #* -
@@ -305,12 +306,8 @@ number_ticks <- function(n) {
 #'
 #' @references
 #' \enumerate{
-#' \item Elbasha EH, Chhatwal J. Myths and misconceptions of within-cycle
-#' correction: a guide for modelers and decision makers. Pharmacoeconomics.
-#' 2016;34(1):13-22.
-#' \item Elbasha EH, Chhatwal J. Theoretical foundations and practical
-#' applications of within-cycle correction methods. Med Decis Mak.
-#' 2016;36(1):115-131.
+#' \item xxxx
+#' \item xxxx
 #' }
 #'
 #' @examples
@@ -1716,12 +1713,8 @@ calculate_outcome <- function(outcome = c("nhb", "nmb", "eff", "cost", "nhb_loss
 #'
 #' @references
 #' \enumerate{
-#' \item Alarid-Escudero F, Enns EA, Kuntz KM, Michaud TL, Jalal H.
-#' "Time Traveling Is Just Too Dangerous" But Some Methods Are Worth Revisiting:
-#' The Advantages of Expected Loss Curves Over Cost-Effectiveness Acceptability
-#' Curves and Frontier. Value Health. 2019;22(5):611-618.
-#' \item Eckermann S, Briggs A, Willan AR. Health technology assessment in the
-#' cost- disutility plane. Med Decis Making. 2008;28(2):172–181.
+#' \item XXXXX
+#' \item XXXXX
 #' }
 #' @examples
 #' data("example_psa_obj")

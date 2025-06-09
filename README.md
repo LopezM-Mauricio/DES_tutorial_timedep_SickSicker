@@ -160,4 +160,4 @@ renv::restore(prompt = T)
 ```
 Contact me at 
 
-mlopezme@stanford.edu; or  mlopezme@gmail.com
+XXXXXX, and XXXXXX

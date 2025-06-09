@@ -1,6 +1,21 @@
 # Functions to implement Discrete Event Simulations 
 # of individual level state transition models. 
-# Authors: many 
+#* Authors: 
+#* - XXXXX
+#* - XXXXX
+#* - XXXXX
+#------------------------------------------------------------------------------#
+#* Please cite the corresponding tutorials when using these functions: 
+#* XXXXX open article
+#* doi: XXXXX
+#* bibtex: XXXXX
+
+#* -
+#* -
+#* -
+#* -
+#* -
+#----------------------------------------------------------------------------#
 #----------------------------------------------------------------------------#
 #----------------------------------------------------------------------------#
 # Negation of % in % operator
@@ -12,10 +27,7 @@
 #                          (NPS-NHPPP) Functions                          ----
 #----------------------------------------------------------------------------#
 #* When using these set of functions please cite: 
-#* Garibay-Treviño, D. U., Jalal, H., & Alarid-Escudero, F. (2025). 
-#* A Fast Nonparametric Sampling Method for Time to Event in
-#*  Individual-Level Simulation Models. Medical Decision Making, 
-#*  45(2), 205–213. https://doi.org/10.1177/0272989X241308768
+#* XXXXXX
 #----------------------------------------------------------------------------#
 #---------------------------------------------------- #
 ##  Age, Sex specific Probabilities of Event Times ----     
@@ -203,9 +215,16 @@ nps_nhppp <- function(m_probs,
 # DES Functions -----
 #----------------------------------------------------------------------------#
 #* Functions developed specifically for the DES tutorial
-#* Please cite the DES Tutorial Article: 
-#* ref[]
-#----------------------------------------------------------------------------#
+#* Authors: 
+#* - XXXXX
+#* - XXXXX
+#* - XXXXX
+#------------------------------------------------------------------------------#
+#* Please cite the article(s) when using this code
+#* XXXXX open article
+#* doi: XXXXX
+#* bibtex: XXXXX
+#------------------------------------------------------------------------------#
 
 #---------------------------------------------------- #
 ##  Initial Parameters    ----   
