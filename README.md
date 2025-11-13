@@ -139,21 +139,21 @@ DES_Tutorial_beta/
 
 # Workflow for collaborators
 
-If you wish to contribute to this repository please follow these instructions.
+If you wish to contribute to this repository please follow these instructions to guarantee that you are using the same version of packages used by the developer.
 
--   Clone the repo.
-
--   Open the project, run in RStudio Terminal:
+1. Run in RStudio Terminal:
 
 `Rscript install_deps.R`
 
-This script will install the package `renv`, which restores locked versions of all dependencies used by the developer. To do so, `renv` will install any missing packages and re-install versions of packages to match the version used by the developer. The script returns a list of packages that were not successfully installed and will require individual troubleshooting.
+This script will install the package `renv`, which restores the 'locked' versions of all dependencies used by the developer. 
+To do so, `renv` will install any missing packages and re-install versions of packages to match the version used by the developer. 
+The script returns a list of packages that were not successfully installed and will require individual troubleshooting.
 
 If all goes well, your environment should now match exactly the environment of the developer.
 
 ## Troubleshooting Package installation
 
-If you run into incompatibilities or mysterious errors running `install.deps.R`, verify that R version 3.5.0 or newer is installed.
+2. If you run into incompatibilities or mysterious errors running `install.deps.R`, verify that R version 3.5.0 or newer is installed.
 
 You can try to install required packages manually, run the below code on a script or from the R console:
 
