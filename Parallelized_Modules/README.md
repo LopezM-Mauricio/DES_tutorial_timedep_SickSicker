@@ -1,10 +1,11 @@
 Parallelized_Modules
 
 Purpose:
-- Parallel / multi-process / multi-threaded variants of modules for performance testing or large-scale runs.
-- Include scripts and utilities to run jobs in parallel (e.g., multiprocessing, joblib, MPI wrappers).
+- Parallel / multi-process / multi-threaded variants of simulation modules for large-scale runs.
 
-Suggested contents:
-- example parallel drivers
-- configuration for number of workers
-- notes on reproducibility and resource usage
+Contents:
+- Probabilistic Analysis following the tutorial paper
+- Analysis of simulation sample size following the tutorial paper
+
+
+  
