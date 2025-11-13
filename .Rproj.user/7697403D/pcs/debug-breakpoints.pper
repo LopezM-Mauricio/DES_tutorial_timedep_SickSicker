@@ -1,5 +1,66 @@
 {
     "debugBreakpointsState": {
-        "breakpoints": []
+        "breakpoints": [
+            {
+                "id": 1,
+                "path": "~/Documents/GITHUB/DES_tutorial_timedep_SickSicker/analysis_modules/Module_C_PSA.R",
+                "line_number": 491,
+                "function_steps": "",
+                "function_name": "toplevel",
+                "state": 1,
+                "editor_state": 1,
+                "editor_line_number": 491,
+                "is_pending_debug_completion": false,
+                "needs_updated_steps": false,
+                "type": 1,
+                "is_package_breakpoint": false,
+                "package_name": ""
+            },
+            {
+                "id": 3,
+                "path": "~/Documents/GITHUB/DES_tutorial_timedep_SickSicker/analysis_modules/Module_C_PSA.R",
+                "line_number": 61,
+                "function_steps": "",
+                "function_name": "toplevel",
+                "state": 1,
+                "editor_state": 1,
+                "editor_line_number": 61,
+                "is_pending_debug_completion": false,
+                "needs_updated_steps": false,
+                "type": 1,
+                "is_package_breakpoint": false,
+                "package_name": ""
+            },
+            {
+                "id": 6,
+                "path": "~/Documents/GITHUB/DES_tutorial_timedep_SickSicker/sim_modules/DES_Sick_Sicker_progressive.R",
+                "line_number": 221,
+                "function_steps": "",
+                "function_name": "toplevel",
+                "state": 1,
+                "editor_state": 1,
+                "editor_line_number": 221,
+                "is_pending_debug_completion": false,
+                "needs_updated_steps": true,
+                "type": 1,
+                "is_package_breakpoint": false,
+                "package_name": ""
+            },
+            {
+                "id": 14,
+                "path": "~/Documents/GITHUB/DES_tutorial_timedep_SickSicker/R/DES_functions.R",
+                "line_number": 640,
+                "function_steps": "",
+                "function_name": "sim_next_event",
+                "state": 2,
+                "editor_state": 2,
+                "editor_line_number": 640,
+                "is_pending_debug_completion": false,
+                "needs_updated_steps": true,
+                "type": 0,
+                "is_package_breakpoint": false,
+                "package_name": ""
+            }
+        ]
     }
 }
