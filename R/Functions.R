@@ -1001,11 +1001,14 @@ format_table_cea <- function(table_cea) {
       "Incremental QALYs", 
       "ICER ($/QALY)") 
   
-  table_cea$`Costs ($)` <- comma(round(table_cea$`Costs ($)`, 0))
-  table_cea$`Incremental Costs ($)` <- comma(round(table_cea$`Incremental Costs ($)`, 0))
+  #table_cea$`Costs ($)` <- comma(round(table_cea$`Costs ($)`, 0))
+  table_cea$`Costs ($)` <- round(table_cea$`Costs ($)`, 0)
+  #table_cea$`Incremental Costs ($)` <- comma(round(table_cea$`Incremental Costs ($)`, 0))
+  table_cea$`Incremental Costs ($)` <- round(table_cea$`Incremental Costs ($)`, 0)
   table_cea$QALYs <- round(table_cea$QALYs, 2)
   table_cea$`Incremental QALYs` <- round(table_cea$`Incremental QALYs`, 2)
-  table_cea$`ICER ($/QALY)` <- comma(round(table_cea$`ICER ($/QALY)`, 0))
+  #table_cea$`ICER ($/QALY)` <- comma(round(table_cea$`ICER ($/QALY)`, 0))
+  table_cea$`ICER ($/QALY)` <- round(table_cea$`ICER ($/QALY)`, 0)
   return(table_cea)
 }
 #---------------------------------------------------# 
