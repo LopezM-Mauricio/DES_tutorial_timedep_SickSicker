@@ -153,7 +153,11 @@ If all goes well, your environment should now match exactly the environment of t
 
 ## Troubleshooting Package installation
 
+<<<<<<< Updated upstream
 2. If you run into incompatibilities or mysterious errors running `install.deps.R`, verify that R version 3.5.0 or newer is installed.
+=======
+If you run into incompatibilities or mysterious errors running `install.deps.R`, verify that R version 3.5.0 or newer is installed.
+>>>>>>> Stashed changes
 
 You can try to install required packages manually, run the below code on a script or from the R console:
 
@@ -216,4 +220,8 @@ You can try to install required packages manually, run the below code on a scrip
 
 ## Contact me at
 
+<<<<<<< Updated upstream
 mlopezme@stanford.edu and mlopezme@gmail.com
+=======
+[mlopezme\@stanford.edu](mailto:mlopezme@stanford.edu){.email} and [mlopezme\@gmail.com](mailto:mlopezme@gmail.com){.email}
+>>>>>>> Stashed changes
