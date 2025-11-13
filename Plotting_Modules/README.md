@@ -1,10 +1,10 @@
 Plotting_Modules
 
 Purpose:
-- Visualization utilities and plotting scripts for results produced by the other modules.
-- Centralize plotting styles, figure export helpers, and example notebooks that create common figures.
+- Visualization and plotting scripts for reproducing exhibits from the tutorial paper.
 
 Suggested contents:
-- plotting helper functions
-- example notebooks or scripts that generate typical analysis plots
-- styling and export settings (dpi, size, file formats)
+- Visualize CEA results following tutorial paper
+- Visualize epidemiological outcomes following tutorial paper
+- Visualize probabilistic analysis-based results following tutorial paper
+- Visualize results from simulation sample size analysis following tutorial paper
