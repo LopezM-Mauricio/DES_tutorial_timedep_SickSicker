@@ -35,7 +35,7 @@
 
 #' Obtain probabilities of events by Age, and Sex from lifetable rates
 #'
-#' \code{obtain_rates_des} obtaien probabilities of events by Age, and Sex from lifetable rates
+#' \code{obtain_rates_des} obtain probabilities of events by Age, and Sex from lifetable rates
 #' 
 #' The elements of each row of the data.frame should sum up to 1. 
 #'
@@ -188,25 +188,6 @@ nps_nhppp <- function(m_probs,
     v_time_to_event <- v_time_to_event + v_unif
   }
   return(v_time_to_event)
-  # 
-  # d <- dim(m_prob)
-  #   n <- d[1]
-  #   k <- d[2]
-  #   lev <- dimnames(m_prob)[[2]]
-  #   if (!length(lev)) 
-  #     lev <- 1:k
-  #   v_time_to_event <- matrix(lev[1], ncol = m, nrow = n)
-  #   U <- t(m_prob)
-  #   for(i in 2:k) {
-  #     U[i, ] <- U[i, ] + U[i - 1, ]
-  #   }
-  #   if (any((U[k, ] - 1) > 1e-05))
-  #     stop("error in multinom: probabilities do not sum to 1")
-  #   
-  #   for (j in 1:m) {
-  #     un <- rep(runif(n), rep(k, n))
-  #     v_time_to_event[, j] <- lev[1 + colSums(un > U)]
-  #   }
 }
 
 
@@ -306,10 +287,9 @@ init_params <- function(
     Race                = sample(c("White", "Black", "Other"), n_sim, replace = TRUE),             # Uniform sampling from "White", "Black", "Other",  constant covariate
     Smoke_6months_t0    = sample(0:6, n_sim, replace = TRUE),                                      # Uniform sampling from 0 to 6,  constant covariate
     # Transition Dynamics          
-    from             = state_init,                                                                     # Origin State, first row, everyone starts in H, update accordingly at each event. 
-    #from                = sample(c(state_init, "S1", "S2"), n_sim, replace = TRUE),
+    from             = state_init,                                                                 # Origin State, first row, everyone starts in H, update accordingly at each event. 
     to                  = NA,                                                                      # Destination State, first row, everyone is NA, update accordingly at each event. 
-    T_n                 = time_horizon[1], #+ runif(n_sim, min = 0.1, max = 0.5),                                                                        # Simulation Time, records time of events, first chunk, all entries are zero, but will be updated to the time when transition/event  occurs 
+    T_n                 = time_horizon[1],                                                                       # Simulation Time, records time of events, first chunk, all entries are zero, but will be updated to the time when transition/event  occurs 
     T_start             = 0,                                                                        # State-residence Time start, first chunk, all entries are zero, but will be updated to the transition that occurs next
     T_stop              = 0,                                                                        # State-residence Time stop, first chunk, all entries are zero, but will be updated to the transition that occurs next
     tau                 = 0,                                                                        # Time-increment, first chunk, all entries are zero, updated after each event
@@ -364,7 +344,7 @@ init_params <- function(
 
 sim_next_event <- function(l_params){
   with(as.list(l_params), {
-    # Setup ------------------------------ #
+    # Current Event Setup ------------------------------ #
     # Determine set of current states
     v_current_state          <- unique(dt_next_event$from) 
     v_current_state_names    <- paste("from", v_current_state, sep = "_")
@@ -388,7 +368,13 @@ sim_next_event <- function(l_params){
     dt_mortality_Sicker[,death_rate := death_rate*hr_S2]
     
     # ----------------------------------------------------------------------------- #
-    # From H ------------------------------ #
+    # Module 1: transitions from Healthy             ------------------------------ #
+    # ----------------------------------------------------------------------------- #
+    # Module Set up
+    # ----------------------------------- #
+    # Task:1 Possible Transitions from Healthy
+    # ----------------------------------- #
+    
     temp   <- l_subsets_dt_next_event$from_H
     
     # Expand each subset to have one row for each possible transition for each ID
@@ -405,10 +391,12 @@ sim_next_event <- function(l_params){
       temp_long              <- temp_long[dt_trans_keys, on = "transition", nomatch = 0L]               # left join trick on data.table, "on" argument sets the Key automatically
       temp_long              <- temp_long[order(ID, transition)]
       
+    # ----------------------------------- #
+    # Task 2. Sample latent arrival times starting from Healthy 
+    # ----------------------------------- #
       # ----------------------------------- #
-      # Sampling times to events from H 
+      ## Submodule  1.1: Transitions Healthy -> Sick   
       # ----------------------------------- #
-      ## Transition #1 , H-> S1,  
       # constant annual rate of becoming Sick when Healthy
       # Sample from exp. distr.
       if(r_HS1 != 0){
@@ -416,7 +404,8 @@ sim_next_event <- function(l_params){
       } else {
         temp_long[transition == 1 , T_stop := Inf]}
       # ----------------------------------- #
-      ## Transition #2 , H-> D
+      ## Submodule  1.2: Transitions Healthy -> Dead
+      # ----------------------------------- #
       # age-dependent, Sex stratified background mortality
       dt_time2death_probs            <- as.data.table(obtain_probs_des(dt_bckgrd_mortality))                         # obtain vector of probabilities
       
@@ -434,7 +423,7 @@ sim_next_event <- function(l_params){
       # Sample time to death
       dt_trans2[,T_stop_aux := nps_nhppp(m_probs = m_probs, correction = "uniform")]
       # ---------------- #
-      # Additional correction, ask MLM about this,  it is addressing a small approximation error with the nps_nhppp method.
+      # Additional correction addressing a minor approximation error with the nps_nhppp method. (ask MLM about it)
       dt_trans2[T_n > Age, tau_aux := T_stop_aux - Age]
       dt_trans2[T_n > Age, T_stop  := T_n + tau_aux]
       dt_trans2[T_n <= Age, T_stop := T_stop_aux]
@@ -445,10 +434,15 @@ sim_next_event <- function(l_params){
       temp_long[transition == 2, T_stop := dt_trans2$T_stop]
       
       # ----------------------------------- #
-      # Predict Next Event from H 
+      # Task 3: Predict the next state 
+      # ----------------------------------- #
       # Create an indicator for minimum value in T_stop by ID and calculate tau
       temp_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
       temp_long[,tau := T_stop - T_start]
+      # ----------------------------------- #
+      # Task 4: Update important variables 
+      # ----------------------------------- #
+      
       ### Update Event Time
       temp_long[status == T,T_n := T_stop]
       ### Update Age
@@ -458,8 +452,14 @@ sim_next_event <- function(l_params){
       dt_event_history <<- rbind(dt_event_history,temp_long)
       setkey(dt_event_history,ID, T_n, Event_num, transition)
     }
-    # ---------------------------------------------------------------------------- #
-    ### From S1 ------------------------------ #
+    # ----------------------------------------------------------------------------- #
+    # Module 1: transitions from Sick                ------------------------------ #
+    # ----------------------------------------------------------------------------- #
+    # Module Set up
+    # ----------------------------------- #
+    # Task:1 Possible Transitions from Sick
+    # ----------------------------------- #
+    
     temp <- l_subsets_dt_next_event$from_S1
     
     if(length(temp)>0){ #necessary because at some point there may not be S1 people
@@ -472,10 +472,12 @@ sim_next_event <- function(l_params){
       # Assign "from" and To" state based on possible transitions, indexed join in data.table
       temp_long              <- temp_long[dt_trans_keys, on = "transition", nomatch = 0L]            # left join trick on data.table, "on" argument sets the Key automatically
       temp_long              <- temp_long[order(ID, transition)]
+    # ----------------------------------- #
+    # Task 2. Sample latent arrival times starting from Sick 
+    # ----------------------------------- #
       # ----------------------------------- #
-      # Sampling times to events from S1
+      ## Submodule 2.1: Transitions Sick -> Healthy   
       # ----------------------------------- #
-      ## Transition #3,  S1 -> H  
       # constant annual rate of becoming Health when Sick
       # Sample from exp. distr.
       if(r_S1H != 0){
@@ -484,7 +486,9 @@ sim_next_event <- function(l_params){
         temp_long[transition == 3, T_stop := Inf]
       }
       # ----------------------------------- #
-      ## Transition #4,  S1 -> S2 
+      ## Submodule 2.2: Transitions Sick -> Sicker   
+      # ----------------------------------- #
+      
       # State-residence time-dependent hazard of transition from Sick to Sicker
       # this transition doesn't depend on simulation time, so we can sample it at any point in time.
       
@@ -501,7 +505,9 @@ sim_next_event <- function(l_params){
       }
       
       # ----------------------------------- #
-      ## Transition #5, S1-> D 
+      ## Submodule 2.3: Transitions Sick -> Dead 
+      # ----------------------------------- #
+      
       # Stratified age-dependent Mortality when Sick              
       dt_time2death_probs_Sick              <- as.data.table(obtain_probs_des(dt_mortality_Sick))
       
@@ -522,7 +528,7 @@ sim_next_event <- function(l_params){
       dt_trans5[, T_stop_aux := nps_nhppp(m_probs = m_probs, correction = "uniform")]
       
       # ---------------- #
-      # Additional correction, ask MLM about this,  it is addressing a small approximation error with the nps_nhppp method.
+      # Additional correction addressing a minor approximation error with the nps_nhppp method. (ask MLM about it)
       dt_trans5[T_n > Age, tau_aux := T_stop_aux - Age]
       dt_trans5[T_n > Age, T_stop  := T_n + tau_aux]
       dt_trans5[T_n <= Age, T_stop := T_stop_aux]
@@ -533,10 +539,14 @@ sim_next_event <- function(l_params){
       temp_long[transition == 5, T_stop := dt_trans5$T_stop]
       
       # ----------------------------------- #
-      ### Predict Next Event from S1 
+      # Task 3: Predict the next state 
+      # ----------------------------------- #
       # Create an indicator for minimum value in T_stop by ID and calculate tau
       temp_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
       temp_long[, tau    := T_stop - T_start]
+      # ----------------------------------- #
+      # Task 4: Update Important Variables
+      # ----------------------------------- #
       ### Update Event Time
       temp_long[status == T,T_n := T_stop]
       ### Update Age
@@ -546,8 +556,13 @@ sim_next_event <- function(l_params){
       dt_event_history <<- rbind(dt_event_history,temp_long)
       setkey(dt_event_history,ID, T_n, Event_num, transition)
     }
-    # ---------------------------------------------------------------------------- #
-    # From S2 ------------------------------ #
+    # ----------------------------------------------------------------------------- #
+    # Module 3: transitions from Sicker               ------------------------------ #
+    # ----------------------------------------------------------------------------- #
+    # Module Set up
+    # ----------------------------------- #
+    # Task:1 Possible Transitions from Sicker
+    # ----------------------------------- #
     temp <- l_subsets_dt_next_event$from_S2
     
     if(length(temp)>0){ #necessary because at some point there may not be S2 people
@@ -567,7 +582,8 @@ sim_next_event <- function(l_params){
       temp_long              <- temp_long[order(ID, transition)]
       
       # ----------------------------------- #
-      ## Transition #6 , S2-> D 
+      ## Submodule  3.1: Transitions Sicker  ->  Dead
+      # ----------------------------------- #
       # Stratified age-dependent Mortality when Sicker              
       dt_time2death_probs_Sicker        <- as.data.table(obtain_probs_des(dt_mortality_Sicker))
       
@@ -587,7 +603,7 @@ sim_next_event <- function(l_params){
       # Sample time to death
       dt_trans6[,T_stop_aux := nps_nhppp(m_probs = m_probs, correction = "uniform")]
       # ---------------- #
-      # Additional correction, ask MLM about this,  it is addressing a small approximation error with the nps_nhppp method.
+      # Additional correction addressing a minor approximation error with the nps_nhppp method. (ask MLM about it)
       dt_trans6[T_n > Age, tau_aux := T_stop_aux - Age]
       dt_trans6[T_n > Age, T_stop  := T_n + tau_aux]
       dt_trans6[T_n <= Age, T_stop := T_stop_aux]
@@ -598,22 +614,28 @@ sim_next_event <- function(l_params){
       temp_long[transition == 6, T_stop := dt_trans6$T_stop]
       
       # ----------------------------------- #
-      ### Predict Next Event from S2 
+      # Task 3: Predict the next state 
+      # ----------------------------------- #
       # Create an indicator for minimum value in T_stop by ID and calculate tau
       temp_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
       temp_long[,tau := T_stop - T_start]
+      # ----------------------------------- #
+      # Task 4: Update Important Variables 
+      # ----------------------------------- #
+      
       ### Update Event Time
       temp_long[status == T,T_n := T_stop]
       ### Update Age
       temp_long[status == T,Age := round(T_n)]
       # ----------------------------------- #
-      ### Update dt_next_event_long 
+      ### Update dt_next_event_long (global)
       dt_event_history <<- rbind(dt_event_history,temp_long)
       setkey(dt_event_history,ID,T_n,Event_num, transition)
     }
     
-    # # ---------------------------------------------------------------------------- #
-    # # New dt_next_event ------------------------------ #
+    #---------------------------------------------------------------------------- #
+    # Next Event Set up
+    #---------------------------------------------------------------------------- #
     # # Copy for next iteration
     dt_next_event <- copy(dt_event_history)
     setkey(dt_next_event,ID, T_n, Event_num, transition)
@@ -622,7 +644,9 @@ sim_next_event <- function(l_params){
     # Keep only transitions that occurred
     dt_next_event <- dt_next_event[status == TRUE] 
     # only work with the last event, ignore previous events,
-    dt_next_event <- dt_next_event[dt_next_event[, .I[Event_num == max(Event_num, na.rm = TRUE)], by = ID]$V1] #.I extracts the indices of vlaues that meet the condition, like whihc.max, but in data.table and allows for grouping
+    dt_next_event <- dt_next_event[dt_next_event[, .I[Event_num == max(Event_num, na.rm = TRUE)], by = ID]$V1] 
+    #.I extracts the indices of values that meet the condition, like which.max, 
+    # but in data.table it also allows for grouping
     
     # slower version, but more understandable--- #
     # # Step 1: Calculate max Event_num for each ID
@@ -634,7 +658,7 @@ sim_next_event <- function(l_params){
     # Handling Events beyond the time horizon (inner)
     # # Those who are alive beyond 100 years or older, assign death status
     dt_next_event[to != "D"  & Age >= time_horizon[2]-1, to :="D"]
-    # discard those who died for next event
+    # discard those who died for next event (inner)
     dt_next_event <- dt_next_event[to != "D"]
     
     # #Reset and update variables of interest
@@ -844,17 +868,12 @@ cea_fn<- function(l_cea_params){
     
     # --- #
     # Total costs and utilities per event
-    # dt_all[ ,Total_cost_ep     := Annual_Cost_ep*tau    + Annual_Cost_trt*tau     + Cost_trans]
-    # dt_all[ ,Total_utility_ep  := Annual_Utility_ep*tau + Annual_Utility_trt*tau + Utility_trans]
-    
-    # dt_all[ ,Total_cost_ep     := Annual_Cost_ep*tau    + Annual_Cost_trt     + Cost_trans]
-    # dt_all[ ,Total_utility_ep  := Annual_Utility_ep*tau + Annual_Utility_trt  + Utility_trans]
-    
     dt_all[ ,Total_cost_ep     := Annual_Cost_ep    + Annual_Cost_trt     + Cost_trans]
     dt_all[ ,Total_utility_ep  := Annual_Utility_ep + Annual_Utility_trt + Utility_trans]
     
     # ----- # 
     # Discounted Cost/Utilities
+    # Following equation (7) in the manuscript:
     ## Discounting Costs
     ### Exponential discounting, lower and upper bounds per event
     dt_all[,v_dwc_t1  := exp(-(d_c) * (T_start - 25)), by = .(ID,Trt)]
@@ -1057,6 +1076,74 @@ plot_epi_outcomes_DES <- function(l_epi_results = epi_fn(l_event_history_strateg
   )
   
 }
+
+#------------------------------------------------------------------------------#
+#             Generate a PSA input parameter dataset                        ####
+#------------------------------------------------------------------------------#
+#' Generate parameter sets for the probabilistic sensitivity analysis (PSA)
+#'
+#' \code{generate_psa_params} generates a PSA dataset of the parameters of the 
+#' cost-effectiveness analysis.
+#' @param n_sim Number of parameter sets for the PSA dataset
+#' @param seed Seed for the random number generation
+#' @return A data.frame with a PSA dataset of he parameters of the 
+#' cost-effectiveness analysis
+#' @export
+generate_psa_params_DES <- function(n_sim = 10, seed = 071818){
+  set.seed(seed) # set a seed to be able to reproduce the same results
+  
+  # Weibull parameters
+  ## Parameters for multivariate lognormal distribution
+  v_means  <- c(0.08, 1.1)    # mean vector
+  v_var    <- c(0.02, 0.05)^2 # vector containing the diagonal of covariances
+  coef_cor <- 0.5             # correlation coefficient
+  m_cor    <- toeplitz(coef_cor^(0:1)) # correlation matrix
+  m_r_S1S2_scale_shape <- MethylCapSig::mvlognormal(n = n_sim, 
+                                                    Mu = v_means, 
+                                                    Sigma = v_var,
+                                                    R = m_cor)
+  colnames(m_r_S1S2_scale_shape) <- c("r_S1S2_scale", "r_S1S2_shape")
+  ## Create data.frame with PSA dataset
+  df_psa <- data.frame(
+    # Transition probabilities (per cycle)
+    r_HS1 = rgamma(n_sim, shape = 30, rate = 170 + 30), # constant rate of becoming Sick when Healthy conditional on surviving
+    r_S1H = rgamma(n_sim, shape = 60, rate = 60 + 60),  # constant rate of becoming Healthy when Sick conditional on surviving
+    hr_S1 = rlnorm(n_sim, log(3), 0.01),         # rate ratio of death in S1 vs healthy 
+    hr_S2 = rlnorm(n_sim, log(10), 0.02),        # rate ratio of death in S2 vs healthy 
+    
+    # Weibull parameters for state-residence-dependent transition probability of 
+    # becoming Sicker when Sick conditional on surviving
+    r_S1S2_scale = m_r_S1S2_scale_shape[, "r_S1S2_scale"],  # transition from S1 to S2 - Weibull scale parameter
+    r_S1S2_shape = m_r_S1S2_scale_shape[, "r_S1S2_shape"],  # transition from S1 to S2 - Weibull shape parameter
+    
+    # Effectiveness of treatment B 
+    hr_S1S2_trtB = rlnorm(n_sim, meanlog = log(0.6), sdlog = 0.02),    # hazard ratio of becoming Sicker when Sick under B
+    
+    ## State rewards
+    # Costs
+    c_H    = rgamma(n_sim, shape = 100,   scale = 20   ),   # cost of remaining one cycle in state H
+    c_S1   = rgamma(n_sim, shape = 177.8, scale = 22.5 ),   # cost of remaining one cycle in state S1
+    c_S2   = rgamma(n_sim, shape = 225,   scale = 66.7 ),   # cost of remaining one cycle in state S2
+    c_trtA = rgamma(n_sim, shape = 73.5, scale = 163.3 ),   # cost of treatment A (per cycle) 
+    c_trtB = rgamma(n_sim, shape = 86.2, scale = 150.8 ),   # cost of treatment B (per cycle)
+    c_D    = 0,                                             # cost of being in the death state
+    
+    # Utilities
+    u_H    = rbeta(n_sim, shape1 = 200, shape2 = 3     ),   # utility when healthy
+    u_S1   = rbeta(n_sim, shape1 = 130, shape2 = 45    ),   # utility when sick
+    u_S2   = rbeta(n_sim, shape1 = 230, shape2 = 230   ),   # utility when sicker
+    u_D    = 0,                                             # utility when dead
+    u_trtA = rbeta(n_sim, shape1 = 300, shape2 = 15    ),   # utility when being treated
+    
+    # Transition rewards 
+    du_HS1 = rbeta(n_sim, shape1 = 11,  shape2 = 1088  ),   # disutility when transitioning from Healthy to Sick
+    ic_HS1 = rgamma(n_sim, shape = 25,  scale = 40     ),   # increase in cost when transitioning from Healthy to Sick
+    ic_D   = rgamma(n_sim, shape = 100, scale = 20     )    # increase in cost when dying
+  )
+  return(df_psa)
+}
+#generate_psa_params_DES(n_sim = 10, seed = 597)
+
 
 # ---------- #
 # PSA Economic Outcomes ----

@@ -2,6 +2,7 @@
 
 ## Authors:
 
+<<<<<<< Updated upstream
 ## Citation(s):
 
 # Quick Guide:
@@ -77,6 +78,67 @@ and a specialized package to sample from the multivariate log-normal distributio
 -   `Plotting_Modules/Aux_Module_Convergence_wPlots.R`
 
 # Structure of Repository:
+=======
+## Quick Guide for Reproducing the Coded-Example of the Tutorial: 
+
+Follow these simple steps to reproduce part or all results and exhibits from the Tutorial Paper.
+
+### Set up
+
+1. Clone the repository
+2. Verify R version 3.5.0 or newer is installed in your machine
+
+### A. Run DES simulation, compute epidemiological and economic outcomes
+
+1. Verify that `dplyr` and `data.table` are installed. 
+2. Run either of the two sim_modules: 
+  - `sim_modules/DES_Sick_Sicker_progressive.R`: runs the simulation following the progressive version fo the Sick Sicker model
+  - `sim_modules/DES_Sick_Sicker_recurrence.R` : runs the simulation following the  version fo the Sick Sicker model that includes recurrence to the Healthy state
+3. Compute the Epidemiological and/or Economic Outcomes based on the DES 
+  - `analysis_modules/Module_A_CEA.R`: computes a cost-effectiveness analysis comparing the strategies described in the coded example of the tutorial
+  - `analysis_modules/Module_B_Epi_Outcomes.R`: computes key epidemiological outcomes comparing the strategies described in the coded example of the tutorial
+
+### B. Parallelized Code to run Probabilistic Analysis and Determine Simulation Sample Size 
+
+We strongly suggest to use parallel runs to compute the probabilistic analysis and to do the analysis of the appropriate simulation sample size
+
+1. To run distributed runs of the DES you need to verify that you have installed the standard  packages for parallelization:
+
+  - `doParallel`
+  - `parallel`  
+  - `foreach`   
+  
+  and a specialized package to sample from the multivariate log-normal distribution: 
+  
+  - `MethylCapSig`
+  
+2. Run probabilistic analysis 
+  - `analysis_modules/Module_C_PSA.R`: computes a probabilistic analysis including 
+  1) Incremental cost-effectiveness ratios (ICERs) with probabilistic output,
+  2)Cost-effectiveness acceptability curves (CEACs) and frontier (CEAF), 
+  3) Expected Loss Curves (ELCs), and 
+  4) Expected value of perfect information (EVPI).
+  
+3. Run analysis of the appropriate simulation sample size
+  - `analysis_modules/Aux_Module_Convergence.R`: computes bootstrap distribution of prevalence estimates at each state 
+  for varying simulation samples sizes and a fixed number of replications.  
+
+### C. Code to Reproduce Publication Grade Plots
+
+1. If you are interested in reproducing the publication-grade plots presented in the tutorial verify that you have installed additional packages:
+
+  - `ggplot2`  
+  - `viridisLite`
+  - `patchwork`
+  - `ggrepel`  
+  - `gridExtra`
+  - `ellipse`  
+  - `ggview`   
+  - `dampack`
+  - `scales`
+
+## Structure of Repository: 
+>>>>>>> Stashed changes
 
 DES_Tutorial_beta/
 
@@ -98,6 +160,7 @@ DES_Tutorial_beta/
 
     └── all_cause_mortality.rda
     └── LifeTable_USA_Mx_2015.csv    
+<<<<<<< Updated upstream
 
 ├── Lite_Modules/
 
@@ -138,6 +201,45 @@ DES_Tutorial_beta/
 ![](table_deps.png)
 
 # Workflow for collaborators
+=======
+    
+├── sim_modules/
+   
+    └── DES_Sick_Sicker_progressive.R
+    
+    └── DES_Sick_Sicker_recurrence.R
+    
+├── analysis_modules/
+    
+    └── Module_A_CEA.R
+    
+    └── Module_B_Epi_Outcomes.R
+    └── Module_C_PSA.R
+    
+    └── Aux_Module_Cont_Time_Trace.R
+    
+    └── Aux_Module_Convergence.R
+    
+├── manuscript/
+   
+    └── manuscript.qmd (.docx; .pdf)
+    
+    └── appendix.qmd   (.docx; .pdf)
+    
+    └── bibliography.bib
+    
+    └── apa-single-spaced.csl
+    
+    └── figures/
+    
+└── R/
+    
+    └── DES_functions.R
+    
+    └── Functions.R
+
+## Workflow for collaborators
+>>>>>>> Stashed changes
 
 If you wish to contribute to this repository please follow these instructions to guarantee that you are using the same version of packages used by the developer.
 
@@ -154,8 +256,13 @@ If all goes well, your environment should now match exactly the environment of t
 ## Troubleshooting Package installation
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 2. If you run into incompatibilities or mysterious errors running `install.deps.R`, verify that R version 3.5.0 or newer is installed.
 =======
+=======
+## Troubleshooting Package installation
+
+>>>>>>> Stashed changes
 If you run into incompatibilities or mysterious errors running `install.deps.R`, verify that R version 3.5.0 or newer is installed.
 >>>>>>> Stashed changes
 
@@ -172,11 +279,43 @@ You can try to install required packages manually, run the below code on a scrip
       "data.table"  ,   # to manipulate data
       "dplyr"       ,   # to manipulate data
 
+<<<<<<< Updated upstream
       "ggplot2"     ,   # to visualize data
       "patchwork"   ,   # for combining ggplot2 figures
       "viridis"     ,   # color palettes
       "ellipse"     ,   # drawing ellipses and ellipse-like confidence regions
       "ggrepel"     ,   # extra geoms for ggplot
+=======
+required_pkgs <- c(
+  "data.table"  ,   # to manipulate data
+  "dplyr"       ,   # to manipulate data
+  "reshape2"    ,   # to manipulate data
+  
+  "ggplot2"     ,   # to visualize data
+  "ggrepel"     ,   # to visualize data
+  "gridExtra"   ,   # to visualize data
+  "ellipse"     ,   # to visualize data
+  "ggview"      ,   # save plots
+  
+  "scales"      ,   # for dollar signs and commas
+  "patchwork"   ,   # for combining ggplot2 figures
+  "dampack"     ,   # for plots of CEA outcomes 
+  
+  "doParallel"  ,   # parallel processing
+  "parallel"    ,   # parallel processing
+  "foreach"     ,   # parallel processing
+  
+  "stats"       ,   # essential statistical functions
+  "MethylCapSig",   # has nice multivariate lognormal random variable generator
+  "survival"    ,   # core survival analysis routines
+  "flexsurv"    ,   # flexible parametric survival models and multistate models
+  
+  "devtools"    ,   # to install packages from GitHub
+  
+  "abind"       ,   # combine multi-dimensional arrays
+  "matrixStats"     # functions operating on rows and columns of matrices
+)
+>>>>>>> Stashed changes
 
       "doParallel"  ,   # parallel processing
       "parallel"    ,   # parallel processing

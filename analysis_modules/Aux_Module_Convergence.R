@@ -35,24 +35,24 @@ gc()               # clean working memory
 ## Load packages ----
 library("data.table"  )
 library("dplyr"       )
-library("tidyr"       )
-library("reshape2"    )
+# library("tidyr"       )
+# library("reshape2"    )
 library("ggplot2"     )
-library("ggrepel"     )
-library("gridExtra"   )
-library("ellipse"     )
-library("ggview"      )
-library("scales"      )
+# library("ggrepel"     )
+# library("gridExtra"   )
+# library("ellipse"     )
+# library("ggview"      )
+# library("scales"      )
 library("patchwork"   )
-library("dampack"     )
+# library("dampack"     )
 library("doParallel"  )
 library("parallel"    )
 library("foreach"     )
-library("stats"       )
-library("MethylCapSig")
-library("survival"    )
-library("flexsurv"    )
-library("devtools"    )
+# library("stats"       )
+# library("MethylCapSig")
+# library("survival"    )
+# library("flexsurv"    )
+# library("devtools"    )
 
 ## Load supplementary functions ----
 source("R/DES_functions.R") # DES specific 
@@ -135,11 +135,11 @@ l_params <- init_params(
 
 # Num. of Cores
 no_cores_all  <- parallel::detectCores()-1      # recommended when not sharing computing resources
-cores_90pct   <- as.integer(.90 * no_cores_all) # aggressive  when shared resources
+# cores_90pct   <- as.integer(.90 * no_cores_all) # aggressive  when shared resources
 cores_85pct   <- as.integer(.85 * no_cores_all) # aggressive  when shared resources
-cores_75pct   <- as.integer(.75 * no_cores_all) # aggressive  when shared resources
-cores_50pct   <- as.integer(.5  * no_cores_all) # recommended when shared resources
-cores_25pct   <- as.integer(.25 * no_cores_all) # recommended when shared resources
+# cores_75pct   <- as.integer(.75 * no_cores_all) # aggressive  when shared resources
+# cores_50pct   <- as.integer(.5  * no_cores_all) # recommended when shared resources
+# cores_25pct   <- as.integer(.25 * no_cores_all) # recommended when shared resources
 
 
 os_info <- Sys.info()
@@ -209,7 +209,7 @@ rm(a_grid_k_5e1_b_size_1e3)
 # # ------------------ #
 # ## run for n_sim 1e5
 l_inputs <- init_params(n_sim = v_n_sim[4])
-a_grid_k_5e1_b_size_1e5 <- run_parallel_model(model_fn = obtain_model_grid_trace, l_inputs = l_inputs, k=k)
+a_grid_k_5e1_b_size_1e5      <- run_parallel_model(model_fn = obtain_model_grid_trace, l_inputs = l_inputs, k=k)
 # Summary
 batch_summary_k_5e1_b_1e5    <- batch_summary(array_grid = a_grid_k_5e1_b_size_1e5, k = k, n_sim = v_n_sim[4])
 rm(a_grid_k_5e1_b_size_1e5)
@@ -235,9 +235,9 @@ batch_summary_all <- as.data.frame(rbind(batch_summary_k_5e1_b_1e2,
 table(batch_summary_all$n_sim)
 # Plot ----
 
-plot_convergence1<- ggplot(batch_summary_all,aes( x= T_n, y = Mean, color = State, fill =State))+
-  geom_line()+
-  geom_ribbon( aes(ymin = Q025, ymax = Q975), alpha = .2, linewidth = 0.2 )+
+plot_convergence1 <- ggplot(batch_summary_all,aes( x= T_n, y = Mean, color = State, fill =State)) +
+  geom_line() +
+  geom_ribbon( aes(ymin = Q025, ymax = Q975), alpha = .2, linewidth = 0.2 ) +
   # Titles and Labs
   xlab("Time (years)") +
   ylab("State Occupancy (Proportion)")+
@@ -275,9 +275,9 @@ plot_convergence1<- ggplot(batch_summary_all,aes( x= T_n, y = Mean, color = Stat
   facet_wrap(~Sim_n)
 plot_convergence1
 
-require(ggview)
-main_plot<- plot_convergence1 + canvas( width  = 28,
-                                height = 20,
-                                units  = c("in"),
-                                dpi    = 200)
-main_plot
+# require(ggview)
+# main_plot<- plot_convergence1 + canvas( width  = 28,
+#                                 height = 20,
+#                                 units  = c("in"),
+#                                 dpi    = 200)
+plot_convergence1

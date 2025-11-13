@@ -50,25 +50,9 @@ gc()               # clean working memory
 ## Load packages ----
 library("data.table"  )
 library("dplyr"       )
-library("tidyr"       )
-library("reshape2"    )
 library("ggplot2"     )
-library("ggrepel"     )
-library("gridExtra"   )
-library("ellipse"     )
-library("ggview"      )
-library("scales"      )
 library("patchwork"   )
 library("viridisLite" )
-library("dampack"     )
-library("doParallel"  )
-library("parallel"    )
-library("foreach"     )
-library("stats"       )
-library("MethylCapSig")
-library("survival"    )
-library("flexsurv"    )
-library("devtools"    )
 
 ## Load supplementary functions ----
 source("R/DES_functions.R") # DES specific 
@@ -86,7 +70,7 @@ l_params <- init_params(
   time_init        = 25    ,
   time_end         = 100   ,
   # Sim. sample size
-  n_sim            = 1e4   ,                                             
+  n_sim            = 1e2   ,                                             
   
   # dt_baseline information        
   ## initial age

@@ -37,23 +37,23 @@ gc()               # clean working memory
 library("data.table"  )
 library("dplyr"       )
 library("tidyr"       )
-library("reshape2"    )
+# library("reshape2"    )
 library("ggplot2"     )
-library("ggrepel"     )
-library("gridExtra"   )
-library("ellipse"     )
-library("ggview"      )
-library("scales"      )
+# library("ggrepel"     )
+# library("gridExtra"   )
+# library("ellipse"     )
+# library("ggview"      )
+# library("scales"      )
 library("patchwork"   )
-library("dampack"     )
-library("doParallel"  )
-library("parallel"    )
-library("foreach"     )
-library("stats"       )
-library("MethylCapSig")
-library("survival"    )
-library("flexsurv"    )
-library("devtools"    )
+# library("dampack"     )
+# library("doParallel"  )
+# library("parallel"    )
+# library("foreach"     )
+# library("stats"       )
+# library("MethylCapSig")
+# library("survival"    )
+# library("flexsurv"    )
+# library("devtools"    )
 
 ## Load supplementary functions ----
 source("R/DES_functions.R") # DES specific 
@@ -247,7 +247,7 @@ trace_plot
 #* The function `discr_time_trace_sick_sicker` provides such approximation by finding the event times
 #* closest to a grid of fixed times points supplied by the user. For example, if we want to compare our DES implementation of the Sick Sicker model
 #* with the discrete time, time dependent cSTM implementation we can supply the same time grid used for the cSTM and find 
-#* the closest even time to each time point on the grid. 
+#* the closest evenT time to each time point on the grid. 
 
 # Discrete Time grid for a cSTM
 cycle_length <- 1/12 # cycle length equal to one year (use 1/12 for monthly)

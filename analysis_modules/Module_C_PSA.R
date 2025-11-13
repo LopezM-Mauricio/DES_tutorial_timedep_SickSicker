@@ -46,24 +46,24 @@ gc()               # clean working memory
 ## Load packages ----
 library("data.table"  )
 library("dplyr"       )
-library("tidyr"       )
-library("reshape2"    )
+# library("tidyr"       )
+# library("reshape2"    )
 library("ggplot2"     )
 library("ggrepel"     )
 library("gridExtra"   )
 library("ellipse"     )
-library("ggview"      )
+# library("ggview"      )
 library("scales"      )
 library("patchwork"   )
-library("dampack"     )
+#library("dampack"     )
 library("doParallel"  )
 library("parallel"    )
 library("foreach"     )
-library("stats"       )
-library("MethylCapSig")
-library("survival"    )
-library("flexsurv"    )
-library("devtools"    )
+# library("stats"       )
+# library("MethylCapSig")
+# library("survival"    )
+# library("flexsurv"    )
+# library("devtools"    )
 
 ## Load supplementary functions ----
 source("R/DES_functions.R") # DES specific 
@@ -185,7 +185,7 @@ v_names_cea_params <- names(l_cea_params_ref)
 
 #------------------------------------------------------------------------------#
 #  PSA input Dataset ----
-n_sim_psa   <- 2e1
+n_sim_psa   <- 10#2e1
 
 v_names_str <- c("Standard of care",      # store the strategy names
                  "Strategy A", 
@@ -194,12 +194,12 @@ v_names_str <- c("Standard of care",      # store the strategy names
 n_str       <- length(v_names_str)        # number of strategies
 
 # Generate PSA Input
-df_psa_input <- generate_psa_params_DES(n_sim = n_sim_psa)
+dt_psa_input <- as.data.table(generate_psa_params_DES(n_sim = n_sim_psa))
 # First six observations
-# head(df_psa_input)
+# head(dt_psa_input)
 
 ### Histogram of parameters ----
-ggplot(melt(df_psa_input, variable.name = "Parameter"), aes(x = value)) +
+ggplot(melt(dt_psa_input, variable.name = "Parameter"), aes(x = value)) +
   facet_wrap(~Parameter, scales = "free") +
   geom_histogram(aes(y = after_stat(density))) +
   ylab("") +
@@ -252,8 +252,8 @@ strategies <- v_strategies
 ## Non-distributed Implementation ----
 # for (i in 1:n_sim_psa) {
 #   print(paste("Init_PSA_iteration",i, sep = "_"))
-#   l_params                  <- update_param_list(l_params_ref, df_psa_input[i,])
-#   l_cea_params              <- update_param_list(l_cea_params_ref, df_psa_input[i,])
+#   l_params                  <- update_param_list(l_params_ref, dt_psa_input[i,])
+#   l_cea_params              <- update_param_list(l_cea_params_ref, dt_psa_input[i,])
 #   # A. Full Histories
 #   l_event_history_strategies        <- list()
 #   # Loop over strategies
@@ -293,12 +293,12 @@ strategies <- v_strategies
 # # ------------------------------------------------------------------------ #
 # ## Distributed Implementation  ----
 # Num. of Cores
-no_cores_all  <- parallel::detectCores()-1      # recommended when not sharing computing resources
-cores_90pct   <- as.integer(.90 * no_cores_all) # aggressive  when shared resources
-cores_85pct   <- as.integer(.85 * no_cores_all) # aggressive  when shared resources
-cores_75pct   <- as.integer(.75 * no_cores_all) # aggressive  when shared resources
-cores_50pct   <- as.integer(.5  * no_cores_all) # recommended when shared resources
-cores_25pct   <- as.integer(.25 * no_cores_all) # recommended when shared resources
+ no_cores_all  <- parallel::detectCores()-1      # recommended when not sharing computing resources
+# cores_90pct   <- as.integer(.90 * no_cores_all) # aggressive  when shared resources
+ cores_85pct   <- as.integer(.85 * no_cores_all) # aggressive  when shared resources
+# cores_75pct   <- as.integer(.75 * no_cores_all) # aggressive  when shared resources
+# cores_50pct   <- as.integer(.5  * no_cores_all) # recommended when shared resources
+# cores_25pct   <- as.integer(.25 * no_cores_all) # recommended when shared resources
 # 
 require(foreach)
 require(parallel)
@@ -332,8 +332,8 @@ df_ce <- foreach::foreach(i = 1:n_sim_psa, .combine = rbind,
                           .packages = c("data.table","dplyr")
 ) %dopar% {
   #param lists
-  l_params                  <- update_param_list(l_params_ref, df_psa_input[i,])
-  l_cea_params              <- update_param_list(l_cea_params_ref, df_psa_input[i,])
+  l_params                  <- update_param_list(l_params_ref, dt_psa_input[i,])
+  l_cea_params              <- update_param_list(l_cea_params_ref, dt_psa_input[i,])
   # A. Simulate Full Event Histories
   l_event_history_strategies              <- list()
   ## Loop over strategies
@@ -361,8 +361,8 @@ df_ce <- foreach::foreach(i = 1:n_sim_psa, .combine = rbind,
   df_ce                                   <- c(l_cea_PSA_iter$Cost, l_cea_PSA_iter$Effect)
 }
 # Extract costs and effects from the PSA dataset
-df_c <- df_ce[, 1:n_str]
-df_e <- df_ce[, (n_str + 1):(2*n_str)]
+df_c <- df_ce[, 1:n_str]                # columns with costs
+df_e <- df_ce[, (n_str + 1):(2*n_str)]  # columns with effects
 # Stop clusters
 parallel::stopCluster(cl)
 # ------------------------------------------------------------------------ #
@@ -370,7 +370,7 @@ parallel::stopCluster(cl)
 # #* Function included in "R/Functions.R" The latest version can be found in `dampack` package
 l_psa <- make_psa_obj(cost          = df_c,
                       effectiveness = df_e,
-                      parameters    = df_psa_input,
+                      parameters    = dt_psa_input,
                       strategies    = v_names_str)
 l_psa$strategies              <- v_names_str
 colnames(l_psa$effectiveness) <- v_names_str
@@ -379,7 +379,7 @@ colnames(l_psa$cost)          <- v_names_str
 # Plots  -----
 # ------------------------------------------------------------------------ #
 # Vector with willingness-to-pay (WTP) thresholds.
-v_wtp <- seq(0, 200000, by = 5000)
+v_wtp <- seq(0, 200000, by = 1000)
 txtsize <- 13
 #------------------- #
 ## Cost-Effectiveness Scatter plot ----
@@ -498,11 +498,11 @@ main_plot <- (gg_scattter + gg_ceac) / (gg_elc + gg_evpi)  +
                   subtitle = "")& theme(
                     plot.title = element_text(size = 22, face = "bold", hjust = 0.5)
                   ) 
-
-main_plot<- main_plot + canvas( width  = 28,
-                                height = 20,
-                                units  = c("in"),
-                                dpi    = 200)
+# require(ggview)
+# main_plot<- main_plot + canvas( width  = 28,
+#                                 height = 20,
+#                                 units  = c("in"),
+#                                 dpi    = 200)
 main_plot
 # ----------------------------------- #
 # ----------------------------------- #

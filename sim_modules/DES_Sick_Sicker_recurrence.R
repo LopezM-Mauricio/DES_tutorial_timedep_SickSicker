@@ -23,10 +23,40 @@
 #* This code implements a Discrete Event Simulation (DES) of a Sick-Sicker model
 #* with recurrence.
 #* Structure: 
-#* Initial parameters stored in a list and  
-#* Modules 1 and 2 are wrapped in the function `sim_next_event()`
+#* Initial parameters stored in a list , `l_params`.  
+#* Modules are wrapped in the function `sim_next_event()`
 #* which updates the `dt_next_event` and `dt_event_history`
-#* A while loop executes sim_next_event until everyone in the simulation has died
+#* The function `sim_next_event()` follows a modular structure : 
+
+# |-> Current Event Set up
+#   |-> Module  1: Transitions from Healthy
+#       |-> Module Set up
+#       |-> Task 1. Possible Transitions from Healthy 
+#       |-> Task 2. Sample latent arrival times starting from Healthy 
+#           |-> Submodule  1.1: Transitions Healthy -> Sick 
+#           |-> Submodule  1.2: Transitions Healthy -> Dead 
+#       |-> Task 3: Predict the next state 
+#       |-> Task 4: Update important variables
+#   |-> Module  2: Transitions from Sick 
+#       |-> Module Set up
+#       |-> Task 1. Possible Transitions from Sick 
+#       |-> Task 2. Sample latent arrival times starting from Sick 
+#           |-> Submodule  2.1: Transitions Sick  ->  Healthy
+#           |-> Submodule  2.2: Transitions Sick  ->  Sicker
+#           |-> Submodule  2.3: Transitions Sick  ->  Dead 
+#       |-> Task 3: Predict the next state 
+#       |-> Task 4: Update important variables
+#   |-> Module  3: Transitions from Sicker 
+#       |-> Module Set up
+#       |-> Task 1. Possible Transitions from Sicker 
+#       |-> Task 2. Sample latent arrival times starting from Sicker 
+#           |-> Submodule  3.1: Transitions Sicker  ->  Dead 
+#       |-> Task 3: Predict the next state 
+#       |-> Task 4: Update important variables
+# |-> Next Event Set up
+
+
+#* A while loop executes  `sim_next_event()`  until everyone in the simulation has died
 #* Complexity included in the model: 
 #* Time Dependence: the DES incorporate two types of type dependency
 #* A. Simulation time-dependence (Age specific mortality)
@@ -40,24 +70,6 @@ gc()               # clean working memory
 ## Load packages ----
 library("data.table"  )
 library("dplyr"       )
-library("tidyr"       )
-library("reshape2"    )
-library("ggplot2"     )
-library("ggrepel"     )
-library("gridExtra"   )
-library("ellipse"     )
-library("ggview"      )
-library("scales"      )
-library("patchwork"   )
-library("dampack"     )
-library("doParallel"  )
-library("parallel"    )
-library("foreach"     )
-library("stats"       )
-library("MethylCapSig")
-library("survival"    )
-library("flexsurv"    )
-library("devtools"    )
 
 ## Load supplementary functions ----
 source("R/DES_functions.R") # DES specific 
@@ -176,7 +188,7 @@ ptime/60
 ptime
 
 #------------------------------------------------------------------------------#
-# Explore one trajectory
+# Explore a single trajectory ----
 
 # Output in long format
 head(dt_event_history)

@@ -42,24 +42,24 @@ gc()               # clean working memory
 ## Load packages ----
 library("data.table"  )
 library("dplyr"       )
-library("tidyr"       )
-library("reshape2"    )
+# library("tidyr"       )
+# library("reshape2"    )
 library("ggplot2"     )
 library("ggrepel"     )
-library("gridExtra"   )
-library("ellipse"     )
-library("ggview"      )
+# library("gridExtra"   )
+# library("ellipse"     )
+# library("ggview"      )
 library("scales"      )
-library("patchwork"   )
-library("dampack"     )
-library("doParallel"  )
-library("parallel"    )
-library("foreach"     )
-library("stats"       )
-library("MethylCapSig")
-library("survival"    )
-library("flexsurv"    )
-library("devtools"    )
+# library("patchwork"   )
+# library("dampack"     )
+# library("doParallel"  )
+# library("parallel"    )
+# library("foreach"     )
+# library("stats"       )
+# library("MethylCapSig")
+# library("survival"    )
+# library("flexsurv"    )
+# library("devtools"    )
 
 ## Load supplementary functions ----
 source("R/DES_functions.R") # DES specific 
@@ -77,7 +77,7 @@ l_params <- init_params(
   time_init        = 25    ,
   time_end         = 100   ,
   # Sim. sample size
-  n_sim            = 1e4   ,                                             
+  n_sim            = 1e2   ,                                             
   
   # dt_baseline information        
   ## initial age
@@ -171,7 +171,7 @@ names(l_event_history_strategies) <- v_strategies
 l_event_history_strategies$A  <- l_event_history_strategies$SoC
 # "B" and "AB"
 l_event_history_strategies$AB <- l_event_history_strategies $B
-View(l_event_history_strategies)  
+#View(l_event_history_strategies)  
 
 #------------------------------------------------------------------------------#
 # Cost-Effectiveness Analysis (CEA) ----
@@ -187,7 +187,7 @@ View(l_event_history_strategies)
 l_cea_params<- list(
   # list of event histories for each strategy
   l_event_history_strategies = l_event_history_strategies,
-  
+
   ## Discounting factors ----
   d_c      = 0.03, # annual discount rate for costs
   d_e      = 0.03, # annual discount rate for QALYs
@@ -225,6 +225,8 @@ l_cea_params<- list(
 
 table_cea<- cea_fn(l_cea_params = l_cea_params)
 table_cea
+
+
 ## Plot CEA frontier -----
 #* Function included in "R/Functions.R"; depends on the `ggplot2`  and `ggrepel` packages.
 #* The latest version can be found in `dampack` package
@@ -232,7 +234,6 @@ table_cea
 plot.icers(table_cea, label = "all", txtsize = 16) +
   expand_limits(x = max(table_cea$Effect) + 0.1) +
   theme(legend.position = c(0.8, 0.2))
-
 
 # ----------------------------------- #
 # ----------------------------------- #

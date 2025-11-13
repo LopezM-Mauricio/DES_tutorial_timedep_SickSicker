@@ -1397,20 +1397,18 @@ plot.psa <- function(x,
   cost <- x$cost
   strategies <- x$strategies
   currency <- x$currency
-  
   # expect that effectiveness and costs have strategy column names
   # removes confusing 'No id variables; using all as measure variables'
   df_cost <- suppressMessages(
-    pivot_longer(cost,
-                 everything(),
-                 names_to = "Strategy",
-                 values_to = "Cost")
+    melt(as.data.table(cost),
+         measure.vars = names(cost),
+                 variable.name = "Strategy",
+                 value.name = "Cost")
   )
   df_effect <- suppressMessages(
-    pivot_longer(effectiveness,
-                 cols = everything(),
-                 names_to = "Strategy",
-                 values_to = "Effectiveness")
+    melt(as.data.table(effectiveness),
+                  variable.name = "Strategy",
+                  value.name = "Effectiveness")
   )
   ce_df <- data.frame("Strategy" = df_cost$Strategy,
                       "Cost" = df_cost$Cost,
