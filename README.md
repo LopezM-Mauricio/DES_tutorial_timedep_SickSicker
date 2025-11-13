@@ -216,4 +216,4 @@ You can try to install required packages manually, run the below code on a scrip
 
 ## Contact me at
 
-[mlopezme\@stanford.edu](mailto:mlopezme@stanford.edu){.email} and [mlopezme\@gmail.com](mailto:mlopezme@gmail.com){.email}
+mlopezme@stanford.edu and mlopezme@gmail.com
