@@ -3,6 +3,7 @@
 ## Authors:
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 ## Citation(s):
 
 # Quick Guide:
@@ -79,6 +80,8 @@ and a specialized package to sample from the multivariate log-normal distributio
 
 # Structure of Repository:
 =======
+=======
+>>>>>>> Stashed changes
 ## Quick Guide for Reproducing the Coded-Example of the Tutorial: 
 
 Follow these simple steps to reproduce part or all results and exhibits from the Tutorial Paper.
@@ -138,6 +141,9 @@ We strongly suggest to use parallel runs to compute the probabilistic analysis a
   - `scales`
 
 ## Structure of Repository: 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 DES_Tutorial_beta/
@@ -239,9 +245,12 @@ DES_Tutorial_beta/
     └── Functions.R
 
 ## Workflow for collaborators
+<<<<<<< Updated upstream
 >>>>>>> Stashed changes
 
 If you wish to contribute to this repository please follow these instructions to guarantee that you are using the same version of packages used by the developer.
+=======
+>>>>>>> Stashed changes
 
 1. Run in RStudio Terminal:
 
@@ -257,9 +266,12 @@ If all goes well, your environment should now match exactly the environment of t
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 2. If you run into incompatibilities or mysterious errors running `install.deps.R`, verify that R version 3.5.0 or newer is installed.
 =======
 =======
+=======
+>>>>>>> Stashed changes
 ## Troubleshooting Package installation
 
 >>>>>>> Stashed changes
