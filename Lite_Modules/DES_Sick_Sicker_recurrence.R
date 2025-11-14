@@ -28,40 +28,43 @@
 #* which updates the `dt_next_event` and `dt_event_history`
 #* The function `sim_next_event()` follows a modular structure : 
 
-# |-> Current Event Set up
-#   |-> Module  1: Transitions from Healthy
-#       |-> Module Set up
+#------------------------------------------------------------------------------#
+# General Structure and flow of the purely progressive Sick-Sicker Model
+#------------------------------------------------------------------------------#
+# while(nrow(dt_next_event)>0) 
+# Execute
+
+#   |-> Module  1: Currently Occupied Health States
+#   |-> Module  2: Transitions between Health States
+#      |-> Submodule 1: Transitions from Healthy
 #       |-> Task 1. Possible Transitions from Healthy 
 #       |-> Task 2. Sample latent arrival times starting from Healthy 
-#           |-> Submodule  1.1: Transitions Healthy -> Sick 
-#           |-> Submodule  1.2: Transitions Healthy -> Dead 
+#           |-> 2.1: Transitions Healthy -> Sick 
+#           |-> 2.2: Transitions Healthy -> Dead 
 #       |-> Task 3: Predict the next state 
 #       |-> Task 4: Update important variables
-#   |-> Module  2: Transitions from Sick 
-#       |-> Module Set up
+#      |-> Submodule 2: Transitions from Sick
 #       |-> Task 1. Possible Transitions from Sick 
 #       |-> Task 2. Sample latent arrival times starting from Sick 
-#           |-> Submodule  2.1: Transitions Sick  ->  Healthy
-#           |-> Submodule  2.2: Transitions Sick  ->  Sicker
-#           |-> Submodule  2.3: Transitions Sick  ->  Dead 
+#           |->  2.1: Transitions Sick  ->  Healthy
+#           |->  2.2: Transitions Sick  ->  Sicker
+#           |->  2.3: Transitions Sick  ->  Dead 
 #       |-> Task 3: Predict the next state 
 #       |-> Task 4: Update important variables
-#   |-> Module  3: Transitions from Sicker 
-#       |-> Module Set up
+#      |-> Submodule 3: Transitions from Sicker
 #       |-> Task 1. Possible Transitions from Sicker 
 #       |-> Task 2. Sample latent arrival times starting from Sicker 
-#           |-> Submodule  3.1: Transitions Sicker  ->  Dead 
+#           |-> 2.1: Transitions Sicker  ->  Dead 
 #       |-> Task 3: Predict the next state 
 #       |-> Task 4: Update important variables
-# |-> Next Event Set up
 
+# A while loop executes  `sim_next_event()`, which contains Module 1 and 2,  until everyone in the simulation has died
 
-#* A while loop executes  `sim_next_event()`  until everyone in the simulation has died
-#* Complexity included in the model: 
-#* Time Dependence: the DES incorporate two types of type dependency
-#* A. Simulation time-dependence (Age specific mortality)
-#* B. State residency time-dependence (Transition S1 -> S2)
-#*Treatment effect acting on transition rate S1->S2
+# Complexity included in the model: 
+# Time Dependence: the DES incorporate two types of type dependency
+# A. Simulation time-dependence (Age specific mortality)
+# B. State residency time-dependence (Transition S1 -> S2)
+# Treatment effect acting on transition rate S1->S2
 #------------------------------------------------------------------------------#
 # Initial setup ---- 
 rm(list = ls())    # remove any variables in R's memory 
@@ -77,10 +80,10 @@ source("R/Functions.R")     # General utility functions
 
 #------------------------------------------------------------------------------#
 # Initialize Parameters ----
-#* We want to pass parameters seamlessly through our function sim_next_event(), 
-#* for this we can declare initial parameters in a list. Here we pass them through
-#* a function `init_param` that will return such list `l_params` and also include the baseline data table
-#* `dt_baseline` as an object of that list, now named `dt_next_event`. 
+# We want to pass parameters seamlessly through our function sim_next_event(), 
+# for this we can declare initial parameters in a list. Here we pass them through
+# a function `init_param` that will return such list `l_params` and also include the baseline data table
+# `dt_baseline` as an object of that list, now named `dt_next_event`. 
 
 l_params <- init_params(
   # Sim. params
@@ -105,8 +108,8 @@ l_params <- init_params(
                        "D"),                                             # Dead (D)
   
   # Indexed Adjacency Matrix
-  #* Zero entries indicate no transition between pairs of states, 
-  #* Nonzero positive entries index possible transitions in arbitrary order
+  # Zero entries indicate no transition between pairs of states, 
+  # Nonzero positive entries index possible transitions in arbitrary order
   m_Tr_r           = matrix(c(0,1,0,2,
                               3,0,4,5,
                               0,0,0,6,
@@ -116,7 +119,7 @@ l_params <- init_params(
                                             c("H", "S1","S2","D"))),
   # Transition Rates 
   ## Mortality 
-  #* we specify subfolder in project to load Life Tables
+  # we specify subfolder in project to load Life Tables
   lifetable        = "Inputs/all_cause_mortality.Rda",
   ## Hazard Ratio while being S1
   hr_S1            =    3,
@@ -134,13 +137,13 @@ l_params <- init_params(
   r_S1S2_shape     =    1.1,
   
   # Strategy 
-  #* Can be any of "SoC", "A", "B", "AB". 
-  #* Only B and AB, affect transitions rates,
+  # Can be any of "SoC", "A", "B", "AB". 
+  # Only B and AB, affect transitions rates,
   strategy         =    "SoC",                                            
   
   # Tx Effects that affect state-transitions
-  #* Effectiveness of strategy B hazard ratio 
-  #* of becoming Sicker when Sick under treatment B
+  # Effectiveness of strategy B hazard ratio 
+  # of becoming Sicker when Sick under treatment B
   hr_S1S2_trtB = 0.6  
 )
 
@@ -189,7 +192,6 @@ ptime
 
 #------------------------------------------------------------------------------#
 # Explore a single trajectory ----
-
 # Output in long format
 head(dt_event_history)
 # Subset to events that occurred
@@ -198,7 +200,7 @@ head(dt_event_history[status == TRUE])
 # Single trajectory
 dt_event_history[status == TRUE & ID == 3]
 
-# With the current setup
+# With the current setup, nsim = 1e5
 # Sim person with ID:3, experienced the following path:
 # H->S1->H->S1->S2->D (read from cols "from" and "to")
 # Events occurred at the following times:

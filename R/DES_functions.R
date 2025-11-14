@@ -345,11 +345,38 @@ init_params <- function(
 #---------------------------------------------------- #
 ##  Update Next Event    ----   
 #---------------------------------------------------- #
+#------------------------------------------------------------------------------#
+# General Structure of `sim_next_event()`
+#   |-> Module  1: Currently Occupied Health States
+#   |-> Module  2: Transitions between Health States
+#      |-> Submodule 1: Transitions from Healthy
+#       |-> Task 1. Possible Transitions from Healthy 
+#       |-> Task 2. Sample latent arrival times starting from Healthy 
+#           |-> 2.1: Transitions Healthy -> Sick 
+#           |-> 2.2: Transitions Healthy -> Dead 
+#       |-> Task 3: Predict the next state 
+#       |-> Task 4: Update important variables
+#      |-> Submodule 2: Transitions from Sick
+#       |-> Task 1. Possible Transitions from Sick 
+#       |-> Task 2. Sample latent arrival times starting from Sick 
+#           |->  2.1: Transitions Sick  ->  Healthy
+#           |->  2.2: Transitions Sick  ->  Sicker
+#           |->  2.3: Transitions Sick  ->  Dead 
+#       |-> Task 3: Predict the next state 
+#       |-> Task 4: Update important variables
+#      |-> Submodule 3: Transitions from Sicker
+#       |-> Task 1. Possible Transitions from Sicker 
+#       |-> Task 2. Sample latent arrival times starting from Sicker 
+#           |-> 2.1: Transitions Sicker  ->  Dead 
+#       |-> Task 3: Predict the next state 
+#       |-> Task 4: Update important variables
+#------------------------------------------------------------------------------#
 
 sim_next_event <- function(l_params){
   with(as.list(l_params), {
-    # Current Event Setup ------------------------------ #
-    # Determine set of current states
+    # ----------------------------------------------------------------------------- #
+    |-> Module  1: Currently Occupied Health States
+    # ----------------------------------------------------------------------------- #
     v_current_state          <- unique(dt_next_event$from) 
     v_current_state_names    <- paste("from", v_current_state, sep = "_")
     
@@ -372,12 +399,12 @@ sim_next_event <- function(l_params){
     dt_mortality_Sicker[,death_rate := death_rate*hr_S2]
     
     # ----------------------------------------------------------------------------- #
-    # Module 1: transitions from Healthy             ------------------------------ #
+    #|-> Module  2: Transitions between Health States
     # ----------------------------------------------------------------------------- #
-    # Module Set up
-    # ----------------------------------- #
-    # Task:1 Possible Transitions from Healthy
-    # ----------------------------------- #
+    #  |-> Submodule 1: Transitions from Healthy
+    # ----------------------------------------------- #
+    #    |-> Task 1: Possible Transitions from Healthy
+    # ----------------------------------------------- #
     
     temp   <- l_subsets_dt_next_event$from_H
     
@@ -394,13 +421,12 @@ sim_next_event <- function(l_params){
       # Assign "from" and to" state based on possible transitions, indexed join in data.table
       temp_long              <- temp_long[dt_trans_keys, on = "transition", nomatch = 0L]               # left join trick on data.table, "on" argument sets the Key automatically
       temp_long              <- temp_long[order(ID, transition)]
-      
-    # ----------------------------------- #
-    # Task 2. Sample latent arrival times starting from Healthy 
-    # ----------------------------------- #
-      # ----------------------------------- #
-      ## Submodule  1.1: Transitions Healthy -> Sick   
-      # ----------------------------------- #
+
+    # ----------------------------------------------- #
+    #    |-> Task 2: Sample latent arrival times starting from Healthy 
+    # ------------------------------------------------ #
+      #    |-> Subtask  2.1: Transitions Healthy -> Sick   
+      # ---------------------------------------------- #
       # constant annual rate of becoming Sick when Healthy
       # Sample from exp. distr.
       if(r_HS1 != 0){
@@ -408,7 +434,7 @@ sim_next_event <- function(l_params){
       } else {
         temp_long[transition == 1 , T_stop := Inf]}
       # ----------------------------------- #
-      ## Submodule  1.2: Transitions Healthy -> Dead
+      #    |-> Subtask 2.2: Transitions Healthy -> Dead
       # ----------------------------------- #
       # age-dependent, Sex stratified background mortality
       dt_time2death_probs            <- as.data.table(obtain_probs_des(dt_bckgrd_mortality))                         # obtain vector of probabilities
@@ -437,33 +463,32 @@ sim_next_event <- function(l_params){
       setkey(dt_trans2,ID,T_n)
       temp_long[transition == 2, T_stop := dt_trans2$T_stop]
       
-      # ----------------------------------- #
-      # Task 3: Predict the next state 
-      # ----------------------------------- #
-      # Create an indicator for minimum value in T_stop by ID and calculate tau
-      temp_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
-      temp_long[,tau := T_stop - T_start]
-      # ----------------------------------- #
-      # Task 4: Update important variables 
-      # ----------------------------------- #
-      
-      ### Update Event Time
-      temp_long[status == T,T_n := T_stop]
-      ### Update Age
-      temp_long[status == T,Age := round(T_n)]
-      # ----------------------------------- #
-      # Update dt_next_event_long 
-      dt_event_history <<- rbind(dt_event_history,temp_long)
-      setkey(dt_event_history,ID, T_n, Event_num, transition)
-    }
-    # ----------------------------------------------------------------------------- #
-    # Module 1: transitions from Sick                ------------------------------ #
-    # ----------------------------------------------------------------------------- #
-    # Module Set up
     # ----------------------------------- #
-    # Task:1 Possible Transitions from Sick
+    # |-> Task 3: Predict the next state 
     # ----------------------------------- #
+    # Create an indicator for minimum value in T_stop by ID and calculate tau
+    temp_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
+    temp_long[,tau := T_stop - T_start]
     
+    # ------------------------------------- #
+    # |-> Task 4: Update important variables 
+    # ------------------------------------- #
+      
+    ### Update Event Time
+    temp_long[status == T,T_n := T_stop]
+    ### Update Age
+    temp_long[status == T,Age := round(T_n)]
+    # ----------------------------------- #
+    # Update dt_next_event_long 
+    dt_event_history <<- rbind(dt_event_history,temp_long)
+    setkey(dt_event_history,ID, T_n, Event_num, transition)
+    }
+    
+    # ----------------------------------------------- #
+    #  |-> Submodule 2: Transitions from Sick
+    # ----------------------------------------------- #
+    #    |-> Task 1: Possible Transitions from Sick
+    # ----------------------------------------------- #    
     temp <- l_subsets_dt_next_event$from_S1
     
     if(length(temp)>0){ #necessary because at some point there may not be S1 people
@@ -476,12 +501,12 @@ sim_next_event <- function(l_params){
       # Assign "from" and To" state based on possible transitions, indexed join in data.table
       temp_long              <- temp_long[dt_trans_keys, on = "transition", nomatch = 0L]            # left join trick on data.table, "on" argument sets the Key automatically
       temp_long              <- temp_long[order(ID, transition)]
-    # ----------------------------------- #
-    # Task 2. Sample latent arrival times starting from Sick 
-    # ----------------------------------- #
-      # ----------------------------------- #
-      ## Submodule 2.1: Transitions Sick -> Healthy   
-      # ----------------------------------- #
+    # -------------------------------------------------------------- #
+    #    |-> Task 2. Sample latent arrival times starting from Sick 
+    # -------------------------------------------------------------- #
+      # ------------------------------------------------- #
+      #     |-> Subtask 2.1: Transitions Sick -> Healthy   
+      # ------------------------------------------------- #
       # constant annual rate of becoming Health when Sick
       # Sample from exp. distr.
       if(r_S1H != 0){
@@ -489,9 +514,9 @@ sim_next_event <- function(l_params){
       }else {
         temp_long[transition == 3, T_stop := Inf]
       }
-      # ----------------------------------- #
-      ## Submodule 2.2: Transitions Sick -> Sicker   
-      # ----------------------------------- #
+      # ----------------------------------------------- #
+      #     |-> Subtask 2.2: Transitions Sick -> Sicker   
+      # ----------------------------------------------- #
       
       # State-residence time-dependent hazard of transition from Sick to Sicker
       # this transition doesn't depend on simulation time, so we can sample it at any point in time.
@@ -508,9 +533,9 @@ sim_next_event <- function(l_params){
         temp_long[transition == 4, T_stop := Inf]
       }
       
-      # ----------------------------------- #
-      ## Submodule 2.3: Transitions Sick -> Dead 
-      # ----------------------------------- #
+      # ---------------------------------------------- #
+      #     |-> Subtask 2.3: Transitions Sick -> Dead 
+      # ---------------------------------------------- #
       
       # Stratified age-dependent Mortality when Sick              
       dt_time2death_probs_Sick              <- as.data.table(obtain_probs_des(dt_mortality_Sick))
@@ -542,31 +567,30 @@ sim_next_event <- function(l_params){
       setkey(dt_trans5,ID,T_n)
       temp_long[transition == 5, T_stop := dt_trans5$T_stop]
       
-      # ----------------------------------- #
-      # Task 3: Predict the next state 
-      # ----------------------------------- #
-      # Create an indicator for minimum value in T_stop by ID and calculate tau
-      temp_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
-      temp_long[, tau    := T_stop - T_start]
-      # ----------------------------------- #
-      # Task 4: Update Important Variables
-      # ----------------------------------- #
-      ### Update Event Time
-      temp_long[status == T,T_n := T_stop]
-      ### Update Age
-      temp_long[status == T,Age := round(T_n)]
-      # ----------------------------------- #
-      ### Update dt_next_event_long 
-      dt_event_history <<- rbind(dt_event_history,temp_long)
+    # ----------------------------------- #
+    #   |-> Task 3: Predict the next state 
+    # ----------------------------------- #
+    # Create an indicator for minimum value in T_stop by ID and calculate tau
+    temp_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
+    temp_long[, tau    := T_stop - T_start]
+    
+    # ----------------------------------- #
+    #  |-> Task 4: Update Important Variables
+    # ----------------------------------- #
+    # Update Event Time
+    temp_long[status == T,T_n := T_stop]
+    # Update Age
+    temp_long[status == T,Age := round(T_n)]
+    # ----------------------------------- #
+    # Update dt_next_event_long 
+    dt_event_history <<- rbind(dt_event_history,temp_long)
       setkey(dt_event_history,ID, T_n, Event_num, transition)
     }
-    # ----------------------------------------------------------------------------- #
-    # Module 3: transitions from Sicker               ------------------------------ #
-    # ----------------------------------------------------------------------------- #
-    # Module Set up
-    # ----------------------------------- #
-    # Task:1 Possible Transitions from Sicker
-    # ----------------------------------- #
+    # ----------------------------------------------- #
+    #  |-> Submodule 3: Transitions from Sicker
+    # ----------------------------------------------- #
+    #    |-> Task 1: Possible Transitions from Sicker
+    # ----------------------------------------------- #  
     temp <- l_subsets_dt_next_event$from_S2
     
     if(length(temp)>0){ #necessary because at some point there may not be S2 people
@@ -584,10 +608,12 @@ sim_next_event <- function(l_params){
       # Assign "from" and To" state based on possible transitions, indexed join in data.table
       temp_long              <- temp_long[dt_trans_keys, on = "transition", nomatch = 0L]         # left join trick on data.table, "on" argument sets the Key automatically
       temp_long              <- temp_long[order(ID, transition)]
-      
-      # ----------------------------------- #
-      ## Submodule  3.1: Transitions Sicker  ->  Dead
-      # ----------------------------------- #
+    # --------------------------------------------------------------- #
+    #    |-> Task 2. Sample latent arrival times starting from Sicker 
+    # --------------------------------------------------------------- #
+      # ----------------------------------------------- #
+      #     |-> Subtask  2.1: Transitions Sicker  ->  Dead
+      # ----------------------------------------------- #
       # Stratified age-dependent Mortality when Sicker              
       dt_time2death_probs_Sicker        <- as.data.table(obtain_probs_des(dt_mortality_Sicker))
       
@@ -617,30 +643,31 @@ sim_next_event <- function(l_params){
       setkey(dt_trans6,ID,T_n)
       temp_long[transition == 6, T_stop := dt_trans6$T_stop]
       
-      # ----------------------------------- #
-      # Task 3: Predict the next state 
-      # ----------------------------------- #
-      # Create an indicator for minimum value in T_stop by ID and calculate tau
-      temp_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
-      temp_long[,tau := T_stop - T_start]
-      # ----------------------------------- #
-      # Task 4: Update Important Variables 
-      # ----------------------------------- #
+    # ----------------------------------- #
+    #   |-> Task 3: Predict the next state 
+    # ----------------------------------- #
+    # Create an indicator for minimum value in T_stop by ID and calculate tau
+    temp_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
+    temp_long[,tau := T_stop - T_start]
+    
+    # ----------------------------------- #
+    #   |-> Task 4: Update Important Variables 
+    # ----------------------------------- #
       
-      ### Update Event Time
-      temp_long[status == T,T_n := T_stop]
-      ### Update Age
-      temp_long[status == T,Age := round(T_n)]
-      # ----------------------------------- #
-      ### Update dt_next_event_long (global)
-      dt_event_history <<- rbind(dt_event_history,temp_long)
-      setkey(dt_event_history,ID,T_n,Event_num, transition)
+    # Update Event Time
+    temp_long[status == T,T_n := T_stop]
+    # Update Age
+    temp_long[status == T,Age := round(T_n)]
+    # ----------------------------------- #
+    # Update dt_next_event_long (global)
+    dt_event_history <<- rbind(dt_event_history,temp_long)
+    setkey(dt_event_history,ID,T_n,Event_num, transition)
     }
     
     #---------------------------------------------------------------------------- #
     # Next Event Set up
     #---------------------------------------------------------------------------- #
-    # # Copy for next iteration
+    # Copy for next iteration
     dt_next_event <- copy(dt_event_history)
     setkey(dt_next_event,ID, T_n, Event_num, transition)
     
@@ -649,23 +676,23 @@ sim_next_event <- function(l_params){
     dt_next_event <- dt_next_event[status == TRUE] 
     # only work with the last event, ignore previous events,
     dt_next_event <- dt_next_event[dt_next_event[, .I[Event_num == max(Event_num, na.rm = TRUE)], by = ID]$V1] 
-    #.I extracts the indices of values that meet the condition, like which.max, 
+    # `.I` extracts the indices of values that meet the condition, like which.max, 
     # but in data.table it also allows for grouping
     
     # slower version, but more understandable--- #
-    # # Step 1: Calculate max Event_num for each ID
+    # Step 1: Calculate max Event_num for each ID
     # max_event <- dt_next_event[, .(Max_Event = max(Event_num, na.rm = TRUE)), by = ID]
-    # # Step 2: Filter the rows in dt_next_event by joining on ID and Event_num
+    # Step 2: Filter the rows in dt_next_event by joining on ID and Event_num
     # dt_next_event <- dt_next_event[max_event, on = .(ID, Event_num = Max_Event)]
     # ------ #
     
     # Handling Events beyond the time horizon (inner)
-    # # Those who are alive beyond 100 years or older, assign death status
+    # Those who are alive beyond 100 years or older, assign death status
     dt_next_event[to != "D"  & Age >= time_horizon[2]-1, to :="D"]
     # discard those who died for next event (inner)
     dt_next_event <- dt_next_event[to != "D"]
     
-    # #Reset and update variables of interest
+    # Reset and update variables of interest
     dt_next_event[,':=' (T_start = T_n,
                          tau = 0,
                          status  = NA,
