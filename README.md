@@ -163,23 +163,28 @@ You can try to install required packages manually, run the below code on a scrip
     }
 
     # Required packages
-    required_pkgs <- c(
+    required_pkgs <- c( 
       "data.table"  ,   # to manipulate data
       "dplyr"       ,   # to manipulate data
 
       "ggplot2"     ,   # to visualize data
+      "ggrepel"     ,   # to visualize data
+      "ellipse"     ,   # to visualize data
+      "viridis"     ,   # color-blind friendly pallettes
+
       "patchwork"   ,   # for combining ggplot2 figures
-      "viridis"     ,   # color palettes
-      "ellipse"     ,   # drawing ellipses and ellipse-like confidence regions
-      "ggrepel"     ,   # extra geoms for ggplot
 
       "doParallel"  ,   # parallel processing
+      "doMC"        ,   # parallel processing
       "parallel"    ,   # parallel processing
       "foreach"     ,   # parallel processing
-      "abind"       ,   # multidimensional arrays
-      
-      "MethylCapSig",   # sample from multivariate lognormal
-      )
+      "abind"       ,   # manipulate multidimensional arrays
+  
+      "MethylCapSig",   # multivariate lognormal random variate generator
+  
+      "matrixStats"     # optimized functions operating on rows and columns of matrices (optional, but strongly encouraged for non-parametric sampling, see /DES_Functions.R)
+    )
+
 
     installed_pkgs   <- rownames(installed.packages())
     to_install_pkgs  <- setdiff(required_pkgs, installed_pkgs)
