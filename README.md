@@ -35,6 +35,7 @@ We strongly suggest to use parallel engines to compute the probabilistic analysi
 1.  To run distributed runs of the DES you need to have installed the standard packages for parallelization:
 
 -   `doParallel`
+-   `doMC`
 -   `parallel`
 -   `abind`
 -   `foreach`
