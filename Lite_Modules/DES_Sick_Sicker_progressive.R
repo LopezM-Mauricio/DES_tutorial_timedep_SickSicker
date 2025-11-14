@@ -20,7 +20,6 @@
 #* RStudio: Version 2022.07.1+554 
 #------------------------------------------------------------------------------#
 # Description ----
-
 #* This code implements a Discrete Event Simulation (DES) of a purely progressive 
 #* Sick-Sicker model. 
 #* Structure: Code is structured in modules as described in Lopez-Mendez et al 2025.
@@ -144,7 +143,7 @@ n_seed             <- 2
 set.seed(n_seed)
 
 # ---- #
-#  Generate state-specific life-tables 
+#  State-specific Life-tables ---
 ## Inputs:   dt_bckgrd_mortality , and  hr_S1, hr_S2
 ## 2.1 Create l copies of the original life table, l corresponds to the number of states with a transition to dead 
 ## 2.2 Apply state-specific hazard ratios to the original life table to obtain state-specific life tables.
@@ -157,37 +156,38 @@ dt_mortality_Sicker      <- copy(dt_bckgrd_mortality)
 dt_mortality_Sicker[, death_rate := death_rate*hr_S2]
 
 #------------------------------------------------------------------------------#
-# Transitions between Health States 
+# General Structure and flow of the purely progressive Sick-Sicker Model
 #------------------------------------------------------------------------------#
-# General Structure of the purely progressive Sick-Sicker Model:
-#   |-> Module  1: Transitions from Healthy
-#       |-> Module Set up
+#   |-> Module  1: Currently Occupied Health States
+#   |-> Module  2: Transitions between Health States
+#      |-> Submodule 1: Transitions from Healthy
 #       |-> Task 1. Possible Transitions from Healthy 
 #       |-> Task 2. Sample latent arrival times starting from Healthy 
-#           |-> Submodule  1.1: Transitions Healthy -> Sick 
-#           |-> Submodule  1.2: Transitions Healthy -> Dead 
+#           |-> 2.1: Transitions Healthy -> Sick 
+#           |-> 2.2: Transitions Healthy -> Dead 
 #       |-> Task 3: Predict the next state 
 #       |-> Task 4: Update important variables
-#   |-> Module  2: Transitions from Sick 
-#       |-> Module Set up
+#   |-> Module  1: Currently Occupied Health States
+#   |-> Module  2: Transitions between Health States
+#      |-> Submodule 2: Transitions from Sick
 #       |-> Task 1. Possible Transitions from Sick 
 #       |-> Task 2. Sample latent arrival times starting from Sick 
-#           |-> Submodule  2.1: Transitions Sick  ->  Healthy
-#           |-> Submodule  2.2: Transitions Sick  ->  Sicker
-#           |-> Submodule  2.3: Transitions Sick  ->  Dead 
+#           |->  2.1: Transitions Sick  ->  Healthy
+#           |->  2.2: Transitions Sick  ->  Sicker
+#           |->  2.3: Transitions Sick  ->  Dead 
 #       |-> Task 3: Predict the next state 
 #       |-> Task 4: Update important variables
-#   |-> Module  3: Transitions from Sicker 
-#       |-> Module Set up
+#   |-> Module  1: Currently Occupied Health States
+#   |-> Module  2: Transitions between Health States
+#      |-> Submodule 3: Transitions from Sicker
 #       |-> Task 1. Possible Transitions from Sicker 
 #       |-> Task 2. Sample latent arrival times starting from Sicker 
-#           |-> Submodule  3.1: Transitions Sicker  ->  Dead 
+#           |-> 2.1: Transitions Sicker  ->  Dead 
 #       |-> Task 3: Predict the next state 
 #       |-> Task 4: Update important variables
 #------------------------------------------------------------------------------#
-#  Module  1: Transitions from Healthy ----
+#  Module 1: Currently Occupied Health States ----
 #------------------------------------------------------------------------------#
-## Module Set up ----
 # Objectives:
 # 1. Generate  sub_tables to be used as inputs for each state-specific Module
 ## Inputs: dt_baseline, or dt_main;
@@ -211,9 +211,12 @@ for( i in seq_along(v_current_state)){
   l_subsets_main_dt[[i]] <-  as.data.table(dt_main[from == v_current_state[i], ])
 }
 names(l_subsets_main_dt) <- v_current_state_names
-
-# ------------------------------------------ #
-## Task 1. Possible Transitions from H ----
+#------------------------------------------------------------------------------#
+#  Module 2: Transitions between Health States ----
+#------------------------------------------------------------------------------#
+## Submodule 1: Transitions from Healthy ---- 
+# ------------------------------------- #
+### Task 1. Possible Transitions from H ----
 # Objective: Identify possible transitions out of the current state (H) 
 # Inputs: l_subsets_main_dt$from_H; m_Tr_r; dt_trans_keys,
 # ------------------------------------------ #
@@ -235,9 +238,9 @@ dt_subset_long   <- dt_subset_long[dt_trans_keys, on = "transition", nomatch = 0
 dt_subset_long   <- dt_subset_long[order(ID, transition)]
 
 # ------------------------------------------- #
-## Task 2: Sample latent Event-times ----
+### Task 2: Sample latent Event-times ----
 # ------------------------------------------- #
-### Sub-module 1-1: Transition #1  (H -> S1) ----
+#### 2.1: Transition #1  (H -> S1) ----
 # ------------------------------------------- #
 
 # Objective: Sample time of occurrence for transition H-> S1 
@@ -252,7 +255,7 @@ if(r_HS1 != 0){   # Case when the transition is allowed
   dt_subset_long[transition == 1, T_stop := Inf]
 }
 # ------------------------------------------ #
-### Sub-module 1-2: Transition #2  (H -> D) ----
+#### 2.2: Transition #2  (H -> D) ----
 # ------------------------------------------- #
 
 # Objective: Sample time of occurrence for transition H-> D 
@@ -285,7 +288,7 @@ setkey(dt_trans2, ID, T_n)
 dt_subset_long[transition == 2, T_stop := dt_trans2$T_stop]
 
 # --------------------------------------- #
-## Task 3: Predict the Next Event from H ----
+### Task 3: Predict the Next Event from H ----
 # Objectives: Determine which transition out of H occurs first
 # Inputs: dt_subset_long
 # --------------------------------------- #
@@ -299,7 +302,7 @@ dt_subset_long[,tau := T_stop - T_start]
 # the Sick and Sicker states in the first event.
 #------------------------------------------------------------------------------#
 # -------------------------------------- #
-## Task 4: Update Important Variables ----
+### Task 4: Update Important Variables ----
 # Objectives: update important variables in the simulation
 # including simulation time, age, event histories.
 #  Updates differ  for the global event history, dt_event_history,
@@ -348,9 +351,8 @@ dt_next_event[,':=' (to = NA,
 # For the next event after the first the only relevant people to
 # keep track of in the simulation are those who transition to Sick
 # ---------------------------------------------------------------------------------------- #
-# Module 2: Transitions from Sick ----
+# Module 1: Currently Occupied Health States ----
 # ---------------------------------------------------------------------------------------- #
-## Module Set up ----
 # Objectives of the Module:
 # 1. Generate data subtables to be used as inputs for  each state-specific Module
 ## Inputs: dt_baseline, or dt_main;
@@ -372,8 +374,12 @@ for( i in seq_along(v_current_state)){
   l_subsets_main_dt[[i]] <-  as.data.table(dt_main[from == v_current_state[i], ])
 }
 names(l_subsets_main_dt) <- v_current_state_names
-# ----------------------------------- #
-## Task 1: Possible Transitions from Sick ----
+#------------------------------------------------------------------------------#
+#  Module 2: Transitions between Health States ----
+#------------------------------------------------------------------------------#
+## Submodule 2: Transitions from Sick ---- 
+# ------------------------------------- #
+### Task 1: Possible Transitions from Sick ----
 # Objective: Identify possible transitions out of the current state (Sick) 
 # Inputs: l_subsets_main_dt$from_S1; m_Tr_r; dt_trans_keys,
 # ----------------------------------- #
@@ -395,10 +401,9 @@ dt_subset_long   <- dt_subset_long[dt_trans_keys, on = "transition", nomatch = 0
 dt_subset_long   <- dt_subset_long[order(ID, transition)]
 
 # ----------------------------------- #
-## Task 2: Sample latent Event-times ----
+### Task 2: Sample latent Event-times ----
 # ----------------------------------- #
-# ----------------------------------- #
-### Sub-module 2-1: Transition #3 (S1 -> H)  ----
+#### 2.1: Transition #3 (S1 -> H)  ----
 # Objective: Sample time of occurrence for transition S1-> H 
 # for every person currently in S1
 # Inputs: dt_subset_long; r_S1H
@@ -412,7 +417,7 @@ if(r_S1H != 0){ # case when the transition is  allowed
   dt_subset_long[transition == 3, T_stop := Inf]  
 }
 # ----------------------------------- #
-### Sub-module 2-2: Transition #4 (S1 -> S2) ----
+#### 2.2: Transition #4 (S1 -> S2) ----
 # Objective: Sample time of occurrence for transition S1-> H 
 # for every person currently in S1
 # Inputs: dt_subset_long; r_S1S2_scale_ph,r_S1S2_shape, hr_S1S2_trtB
@@ -432,7 +437,7 @@ if(r_S1S2_shape*r_S1S2_scale_aft != 0){  # case when the transition is  allowed
   dt_subset_long[transition == 4, T_stop := Inf]
 }
 # ----------------------------------- #
-### Sub-module 2-2: Transition #5  (S1 -> D) ----
+#### 2.3: Transition #5  (S1 -> D) ----
 # Objective: Sample time of occurrence for transition S1-> D 
 # for every person currently in S1.
 # Inputs: obtain_probs_des; dt_time2death_probs;dt_time2death_probs; 
@@ -464,7 +469,7 @@ setkey(dt_trans5,ID,T_n)
 dt_subset_long[transition == 5, T_stop := dt_trans5$T_stop]
 dt_subset_long[transition == 5]
 # ----------------------------------- #
-## Task 3: Predict the Next Event from Sick ----
+### Task 3: Predict the Next Event from Sick ----
 # Objectives: Determine which transition out of S1 occurs first
 # Inputs: dt_subset_long
 # ----------------------------------- #
@@ -474,7 +479,7 @@ dt_subset_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
 dt_subset_long[,tau := T_stop - T_start]
 
 # ----------------------------------- #
-## Task 4: Update Important Variables ----
+### Task 4: Update Important Variables ----
 # Objectives: update important variables in the simulation
 # including simulation time, age, event histories.
 #  Updates differ  for the global event history, dt_event_history,
@@ -524,10 +529,9 @@ dt_next_event[,':=' (to = NA,
 # after the first event, nobody in the simulation stays Healthy.
 # In a purely progressive model with everyone starting in Healthy ,
 # after the second event, nobody in the simulation stays in Healthy nor Sick.
-#------------------------------------------------------------------------------#
-# Module 3: Transitions from Sicker ----
-#------------------------------------------------------------------------------#
-## Module Set up ----
+# ---------------------------------------------------------------------------------------- #
+# Module 1: Currently Occupied Health States ----
+# ---------------------------------------------------------------------------------------- #
 # Objectives of the Module:
 # 1. Generate data subtables to be used as inputs for  each state-specific Module
 ## Inputs: dt_baseline, or dt_main;
@@ -549,8 +553,12 @@ for( i in seq_along(v_current_state)){
   l_subsets_main_dt[[i]] <-  as.data.table(dt_main[from == v_current_state[i], ])
 }
 names(l_subsets_main_dt) <- v_current_state_names
-# ----------------------------------- #
-## Task 1: Possible Transitions from Sicker ----
+#------------------------------------------------------------------------------#
+#  Module 2: Transitions between Health States ----
+#------------------------------------------------------------------------------#
+## Submodule 3: Transitions from Sicker ---- 
+# ------------------------------------- #
+### Task 1: Possible Transitions from Sicker ----
 # ----------------------------------- #
 # Temporary copy of dt_subset from S2
 dt_subset        <- l_subsets_main_dt$from_S2
@@ -569,9 +577,9 @@ dt_subset_long[, c("from","to") := NULL]
 dt_subset_long   <- dt_subset_long[dt_trans_keys, on = "transition", nomatch = 0L]  
 dt_subset_long   <- dt_subset_long[order(ID, transition)]
 # ----------------------------------- #
-## Task 2: Sample latent Event-times -----
+### Task 2: Sample latent Event-times -----
 # ----------------------------------- #
-### Submodule 3-1: Transition #6  (S2 -> D) ----
+#### 2.1: Transition #6  (S2 -> D) ----
 # Objective: Sample time of occurrence for transition S2-> D 
 # for every person currently in S2.
 # Inputs: obtain_probs_des; dt_time2death_probs;dt_time2death_probs; 
@@ -602,7 +610,7 @@ setkey(dt_trans6,ID,T_n)
 # Write into dt_subset_long
 dt_subset_long[transition == 6, T_stop := dt_trans6$T_stop]
 # ----------------------------------- #
-## Task 3: Predict the Next Event from Sicker ----
+### Task 3: Predict the Next Event from Sicker ----
 # Objectives: Determine which transition out of S2 occurs first
 # Inputs: dt_subset_long
 # ----------------------------------- #
@@ -612,7 +620,7 @@ dt_subset_long[, status := as.numeric(T_stop == min(T_stop)), by = ID]
 dt_subset_long[,tau := T_stop - T_start]
 
 # ----------------------------------- #
-## Task 4: Update Important Variables ----
+### Task 4: Update Important Variables ----
 # Objectives: update important variables in the simulation
 # including simulation time, age, event histories.
 # Updates differ  for the global event history, dt_event_history,
@@ -631,6 +639,7 @@ setkey(dt_event_history, ID, T_n, Event_num, transition)
 # ----#
 # Quick Validation ----
 # ---- #
+# nsim = 1e5
 # Verify everyone follows progression H->S1->S2->D, or dies in between
 dt_event_history[, from_to := paste(from, to, sep = "_")]
 table(dt_event_history[status==TRUE]$from_to)
