@@ -56,7 +56,7 @@ required_pkgs <- c(
   
   "MethylCapSig",   # has nice multivariate lognormal random variable generator
   
-  "matrixStats"   # functions operating on rows and columns of matrices (optional)
+  "matrixStats"     # optimized functions operating on rows and columns of matrices (optional, but strongly encouraged for non-parametric sampling)
   
 )
 
