@@ -179,8 +179,12 @@ nps_nhppp <- function(m_probs,
   # Number of time to events to draw
   n_samp <- nrow(m_probs)
   
-  v_unif <- runif(n_samp, min = 0, max = 1)
+  v_unif  <- runif(n_samp, min = 0, max = 1)
+  # matrixStats is written in C and optimized for large Matrix. 
   v_sum_p <- matrixStats::rowCumsums(m_probs)
+  # slower alternative using base R
+  # v_sum_p <- t(apply(m_probs))
+  
   v_time_to_event <- v_categories[max.col(v_sum_p >= v_unif, 
                                           ties.method = "first")]
   
@@ -1198,8 +1202,6 @@ cea_psa_fn<- function(l_cea_params, n_wtp = 100000){
     
     # --- #
     # Totaling costs and utilities per event
-    # dt_all[ ,Total_cost_ep     := Annual_Cost_ep*tau    + Annual_Cost_trt*tau     + Cost_trans]
-    # dt_all[ ,Total_utility_ep  := Annual_Utility_ep*tau + Annual_Utility_trt*tau  + Utility_trans]
     dt_all[ ,Total_cost_ep     := Annual_Cost_ep    + Annual_Cost_trt     + Cost_trans]
     dt_all[ ,Total_utility_ep  := Annual_Utility_ep + Annual_Utility_trt + Utility_trans]
     
