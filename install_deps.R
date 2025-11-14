@@ -46,17 +46,19 @@ required_pkgs <- c(
   "ggplot2"     ,   # to visualize data
   "ggrepel"     ,   # to visualize data
   "ellipse"     ,   # to visualize data
+  "viridis"     ,   # color-blind friendly pallettes
 
   "patchwork"   ,   # for combining ggplot2 figures
 
   "doParallel"  ,   # parallel processing
+  "doMC"        ,   # parallel processing
   "parallel"    ,   # parallel processing
   "foreach"     ,   # parallel processing
   "abind"       ,   # manipulate multidimensional arrays
   
   "MethylCapSig",   # has nice multivariate lognormal random variable generator
   
-  "matrixStats"     # optimized functions operating on rows and columns of matrices (optional, but strongly encouraged for non-parametric sampling)
+  "matrixStats"     # optimized functions operating on rows and columns of matrices (optional, but strongly encouraged for non-parametric sampling, see /DES_Functions.R)
   
 )
 
