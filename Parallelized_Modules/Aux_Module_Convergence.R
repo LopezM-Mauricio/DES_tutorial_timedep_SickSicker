@@ -138,10 +138,8 @@ if (os == "Darwin") { # Apple Kernel
   doParallel::registerDoParallel(cl)
 }
 if (os == "Linux") {
-  # Initialize cluster object
-  cl <- parallel::makeCluster(no_cores)
   # Register clusters
-  doParallel::registerDoMC(cl)
+  doMC::registerDoMC(cores = no_cores)
 }
 if (os == "Windows") {  
   # Initialize cluster object
