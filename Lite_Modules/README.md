@@ -6,7 +6,7 @@ Purpose:
 
 Contents:
 - DES of purely progressive Sick Sicker model
-- DES of Sick Sicker models with recursion to tthe Healthy state
-- CEA otcomes following the tutorial paper
-- Epidemiological otcomes following the tutorial paper
+- DES of Sick Sicker models with recursion to the Healthy state
+- CEA outcomes following the tutorial paper
+- Epidemiological outcomes following the tutorial paper
 - State occupancy trace matrix following the tutorial paper
